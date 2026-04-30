@@ -23,7 +23,12 @@ pnpm db:migrate
 # 4. Generate database types
 pnpm db:types
 
-# 5. Start dev server
+# 5. Seed two demo users + a sample track / module / lesson / quiz
+pnpm db:seed:demo
+#   admin    admin@example.test  / admin-password-123
+#   learner  learner@example.test / learner-password-123
+
+# 6. Start dev server
 pnpm dev
 ```
 
