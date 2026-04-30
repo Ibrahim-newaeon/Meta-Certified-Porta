@@ -20,6 +20,7 @@
     "@anthropic-ai/sdk": "^0.91.1",
     "@hookform/resolvers": "^5.2.2",
     "@microlink/mql": "^0.16.0",
+    "@mux/mux-node": "^14.0.1",
     "@mux/mux-player-react": "^3.13.0",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.105.1",
