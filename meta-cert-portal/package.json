@@ -14,7 +14,10 @@
     "db:types": "supabase gen types typescript --local > src/types/supabase.ts",
     "db:diff": "supabase db diff",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
-    "format:check": "prettier --check \"**/*.{ts,tsx,md,json}\""
+    "format:check": "prettier --check \"**/*.{ts,tsx,md,json}\"",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "playwright test",
+    "test:e2e:install": "playwright install --with-deps"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.1",
