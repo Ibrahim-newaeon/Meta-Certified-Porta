@@ -19,6 +19,16 @@ export default async function Dashboard() {
   const enrollments = enrollmentsData ?? [];
   const trackIds = enrollments.map((e) => e.track_id);
 
+  const { data: publishedTracksData } = await supabase
+    .from('certification_tracks')
+    .select('id, code, title, slug, description, exam_minutes, pass_score')
+    .eq('is_published', true)
+    .order('code');
+  const enrolledIds = new Set(trackIds);
+  const availableTracks = (publishedTracksData ?? []).filter(
+    (t) => !enrolledIds.has(t.id)
+  );
+
   const lessonsPerTrack: Record<string, string[]> = {};
   const lessonMinutes: Record<string, number> = {};
   if (trackIds.length > 0) {
@@ -169,6 +179,39 @@ export default async function Dashboard() {
           </div>
         )}
       </section>
+
+      {availableTracks.length > 0 && (
+        <section>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Available tracks</h2>
+            <Link href="/tracks" className="text-sm text-slate-600 hover:underline">
+              See all →
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {availableTracks.map((t) => (
+              <div key={t.id} className="rounded-lg border bg-white p-4">
+                <div className="font-mono text-xs text-slate-500">{t.code}</div>
+                <div className="mt-1 font-semibold">{t.title}</div>
+                {t.description && (
+                  <p className="mt-2 line-clamp-2 text-sm text-slate-600">
+                    {t.description}
+                  </p>
+                )}
+                <div className="mt-3 text-xs text-slate-500">
+                  {t.exam_minutes} min exam · {t.pass_score}% to pass
+                </div>
+                <Link
+                  href={`/tracks/${t.id}`}
+                  className="mt-4 inline-flex h-9 items-center rounded-md bg-slate-900 px-3 text-sm font-medium text-white hover:bg-slate-800"
+                >
+                  View &amp; enroll
+                </Link>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
