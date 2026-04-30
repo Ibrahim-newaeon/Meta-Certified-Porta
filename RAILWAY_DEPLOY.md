@@ -4,6 +4,16 @@ The Next.js app lives in `meta-cert-portal/`. Railway is configured via
 `meta-cert-portal/railway.json` (Nixpacks builder, `/api/health` as the
 healthcheck endpoint, restart-on-failure with up to 5 retries).
 
+The app uses Next 16's `output: 'standalone'` (in `next.config.ts`):
+
+- `next build` emits a self-contained server at `.next/standalone/server.js`.
+- A `postbuild` hook (`scripts/standalone-postbuild.mjs`) copies
+  `.next/static/` and `public/` into the standalone tree — Vercel does
+  this automatically, Railway does not.
+- `pnpm start` runs `node .next/standalone/server.js` with
+  `HOSTNAME=0.0.0.0` (so Railway can route traffic to the container)
+  and `PORT=${PORT:-3000}` (Railway injects `$PORT`).
+
 > **Note on the original blueprint:** the locked stack specified Vercel.
 > Railway is an alternate target — pick one. Don't deploy to both at
 > the same time without coordinating env vars and Mux webhook URLs.
@@ -80,8 +90,8 @@ railway up
 
 Railway uploads the directory (respecting `.railwayignore`), runs
 Nixpacks (auto-detects pnpm via `pnpm-lock.yaml`, runs `pnpm install`
-then `pnpm build`), and starts with `pnpm start`. Next.js' `next start`
-honors Railway's injected `PORT` automatically.
+then `pnpm build` — which also runs the `postbuild` hook), and starts
+with `pnpm start` (the standalone server bound to `0.0.0.0:$PORT`).
 
 To stream logs:
 
