@@ -1,0 +1,13 @@
+# Things Railway doesn't need to upload
+.git
+.next
+node_modules
+tests/e2e
+playwright-report
+playwright.config.ts
+docs
+supabase/.temp
+supabase/.branches
+.env.local
+.env.local.example
+README.md
