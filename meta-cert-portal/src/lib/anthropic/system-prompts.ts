@@ -41,3 +41,24 @@ Rules:
 - Mirror Meta's real exam style: scenario-based, application-focused, not pure recall
 - Include 1 distractor that reflects a common misconception
 - Explanations must reference the source material`;
+
+// Wrap the lesson's PDF text in a stable XML envelope. The wrapper text is
+// constant; only the inner content changes per lesson. We render this as its
+// own system block so it can be cached with `cache_control: ephemeral` —
+// repeat questions about the same lesson hit the prompt cache.
+export function lessonContextBlock(lessonTitle: string, pdfText: string | null): string | null {
+  if (!pdfText) return null;
+  // Cap to ~24K chars (~6K tokens) of PDF context so we leave room for
+  // history, system prompt, and the user turn.
+  const trimmed = pdfText.slice(0, 24_000);
+  // SECURITY: strip XML-injection vectors from the title before embedding
+  const safeTitle = lessonTitle.replace(/[<>"&]/g, '');
+  return [
+    `<lesson_context lesson="${safeTitle}">`,
+    trimmed,
+    `</lesson_context>`,
+    ``,
+    `Use the <lesson_context> when answering. Quote it sparingly. If the answer`,
+    `is not in the context, say so and offer general Meta Blueprint guidance.`,
+  ].join('\n');
+}

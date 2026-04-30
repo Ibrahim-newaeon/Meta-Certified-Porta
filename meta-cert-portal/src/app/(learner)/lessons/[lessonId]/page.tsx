@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { requireUser } from '@/lib/auth/roles';
 import { LessonViewer, type PreparedResource } from '@/components/learner/lesson-viewer';
+import { LessonChatDrawer } from '@/components/ai-tutor/lesson-chat-drawer';
 import { signPdfUrl, signMuxPlayback } from '@/lib/signing';
 
 export default async function LessonPage({
@@ -68,12 +69,15 @@ export default async function LessonPage({
   );
 
   return (
-    <LessonViewer
-      lessonId={lesson.id}
-      lessonTitle={lesson.title}
-      resources={prepared}
-      initialPosition={progress?.last_position ?? 0}
-      initialStatus={progress?.status ?? null}
-    />
+    <>
+      <LessonViewer
+        lessonId={lesson.id}
+        lessonTitle={lesson.title}
+        resources={prepared}
+        initialPosition={progress?.last_position ?? 0}
+        initialStatus={progress?.status ?? null}
+      />
+      <LessonChatDrawer lessonId={lesson.id} />
+    </>
   );
 }

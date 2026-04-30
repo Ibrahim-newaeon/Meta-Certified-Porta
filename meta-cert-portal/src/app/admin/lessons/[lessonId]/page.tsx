@@ -5,6 +5,7 @@ import { ResourceLinkForm } from '@/components/admin/resource-link-form';
 import { ResourcePdfForm } from '@/components/admin/resource-pdf-form';
 import { ResourceVideoForm } from '@/components/admin/resource-video-form';
 import { DeleteResourceButton } from '@/components/admin/delete-resource-button';
+import { QuizGenButton } from '@/components/admin/quiz-gen-button';
 
 type ResourceRow = {
   id: string;
@@ -137,6 +138,24 @@ export default async function LessonAdminPage({
           </table>
         </div>
       </section>
+
+      {rows.some((r) => r.kind === 'pdf') && (
+        <section>
+          <h2 className="mb-2 text-sm font-medium text-slate-700">AI quiz</h2>
+          <div className="rounded-lg border bg-white p-4">
+            <p className="mb-3 text-xs text-slate-600">
+              Generate a Meta-style practice quiz from this lesson&apos;s PDF
+              content. The quiz is scoped to this lesson and added to the
+              quizzes table; learners can take it at{' '}
+              <span className="font-mono">/exam/&lt;quizId&gt;</span>.
+            </p>
+            <QuizGenButton
+              lessonId={lesson.id}
+              examCodes={Array.from(new Set(rows.flatMap((r) => r.exam_codes)))}
+            />
+          </div>
+        </section>
+      )}
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div>
