@@ -3,7 +3,16 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-const PUBLIC_ROUTES = ['/login', '/register', '/auth/callback', '/api/health', '/'];
+// Webhooks must be public — they're called by external services (Mux) without
+// our auth cookie. The handlers verify the request via signing-secret HMAC.
+const PUBLIC_ROUTES = [
+  '/login',
+  '/register',
+  '/auth/callback',
+  '/api/health',
+  '/api/mux/webhook',
+  '/',
+];
 const ADMIN_ROUTES = ['/admin'];
 
 export async function proxy(request: NextRequest) {
