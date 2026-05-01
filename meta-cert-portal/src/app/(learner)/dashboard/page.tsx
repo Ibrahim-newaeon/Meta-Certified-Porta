@@ -87,20 +87,20 @@ export default async function Dashboard() {
 
   return (
     <div className="space-y-8 p-6">
-      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-700 via-indigo-700 to-violet-800 p-8 text-white shadow-sm">
+      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-700 via-teal-700 to-cyan-800 p-8 text-white shadow-sm">
         <div className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-fuchsia-400/20 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-lime-300/20 blur-3xl" />
         <div className="relative">
           <h1 className="text-3xl font-semibold tracking-tight">
             Welcome back, {greeting}
           </h1>
-          <p className="mt-2 max-w-xl text-blue-100">
+          <p className="mt-2 max-w-xl text-emerald-100">
             Track your certification progress, jump into a lesson, or browse new tracks.
           </p>
           {recentLesson && (
             <Link
               href={`/lessons/${recentLesson.id}`}
-              className="mt-5 inline-flex h-10 items-center rounded-md bg-white px-5 text-sm font-medium text-indigo-700 shadow-sm hover:bg-blue-50"
+              className="mt-5 inline-flex h-10 items-center rounded-md bg-white px-5 text-sm font-medium text-emerald-700 shadow-sm hover:bg-emerald-50"
             >
               Resume: {recentLesson.title}
             </Link>
@@ -135,14 +135,14 @@ export default async function Dashboard() {
       <section>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-slate-900">Your certifications</h2>
-          <Link href="/tracks" className="text-sm text-indigo-600 hover:underline">
+          <Link href="/tracks" className="text-sm text-emerald-700 hover:underline">
             Browse all tracks →
           </Link>
         </div>
         {enrollments.length === 0 ? (
           <div className="rounded-lg border bg-white p-6 text-center text-sm text-slate-600">
             You haven&apos;t enrolled in any certification tracks yet.{' '}
-            <Link href="/tracks" className="text-indigo-600 underline">
+            <Link href="/tracks" className="text-emerald-700 underline">
               Browse tracks
             </Link>
             .
@@ -161,9 +161,9 @@ export default async function Dashboard() {
               return (
                 <div
                   key={e.track_id}
-                  className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-indigo-200 hover:shadow-md"
+                  className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-emerald-200 hover:shadow-md"
                 >
-                  <span className="inline-flex items-center rounded-full bg-indigo-50 px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-indigo-700">
+                  <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-emerald-700">
                     {track.code}
                   </span>
                   <div className="mt-2 font-semibold text-slate-900">{track.title}</div>
@@ -181,14 +181,14 @@ export default async function Dashboard() {
                     </div>
                     <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-slate-100">
                       <div
-                        className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 transition-all"
+                        className="h-full bg-gradient-to-r from-emerald-500 to-teal-600 transition-all"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
                   </div>
                   <Link
                     href={`/tracks/${track.id}`}
-                    className="mt-4 inline-flex h-9 items-center rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700"
+                    className="mt-4 inline-flex h-9 items-center rounded-md border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 hover:border-emerald-300 hover:bg-emerald-50 hover:text-emerald-700"
                   >
                     Open track
                   </Link>
@@ -203,7 +203,7 @@ export default async function Dashboard() {
         <section>
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-slate-900">Available tracks</h2>
-            <Link href="/tracks" className="text-sm text-indigo-600 hover:underline">
+            <Link href="/tracks" className="text-sm text-emerald-700 hover:underline">
               See all →
             </Link>
           </div>
@@ -211,9 +211,9 @@ export default async function Dashboard() {
             {availableTracks.map((t) => (
               <div
                 key={t.id}
-                className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-indigo-200 hover:shadow-md"
+                className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-emerald-200 hover:shadow-md"
               >
-                <span className="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-emerald-700">
+                <span className="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-amber-700">
                   {t.code}
                 </span>
                 <div className="mt-2 font-semibold text-slate-900">{t.title}</div>
@@ -227,7 +227,7 @@ export default async function Dashboard() {
                 </div>
                 <Link
                   href={`/tracks/${t.id}`}
-                  className="mt-4 inline-flex h-9 items-center rounded-md bg-gradient-to-r from-blue-600 to-indigo-600 px-3 text-sm font-medium text-white shadow-sm hover:from-blue-700 hover:to-indigo-700"
+                  className="mt-4 inline-flex h-9 items-center rounded-md bg-gradient-to-r from-emerald-600 to-teal-600 px-3 text-sm font-medium text-white shadow-sm hover:from-emerald-700 hover:to-teal-700"
                 >
                   View &amp; enroll
                 </Link>
@@ -243,7 +243,7 @@ export default async function Dashboard() {
 const TONES = {
   emerald: { ring: 'ring-emerald-100', bar: 'bg-emerald-500', text: 'text-emerald-700' },
   amber: { ring: 'ring-amber-100', bar: 'bg-amber-500', text: 'text-amber-700' },
-  indigo: { ring: 'ring-indigo-100', bar: 'bg-indigo-500', text: 'text-indigo-700' },
+  indigo: { ring: 'ring-teal-100', bar: 'bg-teal-500', text: 'text-teal-700' },
 } as const;
 
 function Stat({
