@@ -104,7 +104,7 @@ export default async function Dashboard() {
           {recentLesson && (
             <Link
               href={`/lessons/${recentLesson.id}`}
-              className="mt-5 inline-flex h-11 items-center rounded-md bg-white px-5 text-sm font-medium text-[var(--color-brand-soft-fg)] shadow-sm transition-colors hover:bg-white/90"
+              className="mt-5 inline-flex h-11 items-center rounded-md bg-[var(--background)] px-5 text-sm font-medium text-[var(--color-brand-soft-fg)] shadow-sm transition-colors hover:bg-[var(--surface-muted)]"
             >
               Resume: {recentLesson.title}
             </Link>
