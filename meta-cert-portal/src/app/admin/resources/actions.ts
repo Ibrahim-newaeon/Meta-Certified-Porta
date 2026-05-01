@@ -34,7 +34,6 @@ export async function createLinkResourceAction(
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input' };
 
   const d = parsed.data;
-  // SECURITY: anon-keyed client; RLS "resources_admin_write" enforces is_admin()
   const { error } = await supabase.from('resources').insert({
     lesson_id: d.lessonId,
     kind: 'link',
@@ -60,7 +59,6 @@ const PdfFinalizeInput = z.object({
 export async function finalizePdfResourceAction(
   input: z.input<typeof PdfFinalizeInput>
 ): Promise<Result> {
-  // SECURITY: must precede any service-role client use
   await requireRole('admin');
   const parsed = PdfFinalizeInput.safeParse(input);
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input' };
@@ -68,7 +66,6 @@ export async function finalizePdfResourceAction(
 
   const admin = createAdminClient();
 
-  // Download the file with service role to extract text server-side.
   const { data: file, error: dlErr } = await admin.storage.from(d.bucket).download(d.path);
   if (dlErr || !file) return { error: 'Storage download failed' };
 
@@ -81,7 +78,6 @@ export async function finalizePdfResourceAction(
     text = out.text;
     pageCount = out.pageCount;
   } catch {
-    // Don't fail the upload if extraction fails — the PDF is still viewable.
     text = '';
     pageCount = 0;
   }
@@ -93,7 +89,6 @@ export async function finalizePdfResourceAction(
     storage_bucket: d.bucket,
     storage_path: d.path,
     page_count: pageCount,
-    // SECURITY: cap stored text to ~1MB to bound row size and Postgres TOAST cost
     extracted_text: text.slice(0, 1_000_000),
     order_index: d.orderIndex,
   });
@@ -109,13 +104,11 @@ export async function createMuxUploadAction(lessonId: string, title: string) {
   z.string().uuid().parse(lessonId);
   z.string().min(2).max(200).parse(title);
 
-  // SECURITY: signed playback policy — viewers need a JWT signed per-request
   const upload = await getMux().video.uploads.create({
     cors_origin: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
     new_asset_settings: { playback_policy: ['signed'] },
   });
 
-  // Pre-create a placeholder resource row; webhook will populate playback_id.
   const { data, error } = await supabase
     .from('resources')
     .insert({
@@ -124,7 +117,6 @@ export async function createMuxUploadAction(lessonId: string, title: string) {
       title,
       video_provider: 'mux',
       video_asset_id: 'pending',
-      // Temporarily store the upload id; webhook swaps it for the real playback id.
       video_playback_id: upload.id,
     })
     .select('id')
@@ -132,6 +124,77 @@ export async function createMuxUploadAction(lessonId: string, title: string) {
   if (error) return { error: error.message };
 
   return { uploadUrl: upload.url, resourceId: data.id, uploadId: upload.id };
+}
+
+// ---------- UPDATE ----------
+const ResourcePatch = z.object({
+  title: z.string().min(2).max(200).optional(),
+  url: z.string().url().optional().or(z.literal('').transform(() => undefined)),
+  examCodes: z.array(z.string()).optional(),
+  orderIndex: z.coerce.number().int().min(0).optional(),
+});
+
+export async function updateResourceAction(_: Result, fd: FormData): Promise<Result> {
+  const { supabase } = await requireRole('admin');
+  const id = String(fd.get('id') ?? '');
+  const lessonId = String(fd.get('lessonId') ?? '');
+  z.string().uuid().parse(id);
+  z.string().uuid().parse(lessonId);
+
+  const examCodesRaw = fd.getAll('examCodes').map((v) => String(v)).filter(Boolean);
+
+  const parsed = ResourcePatch.safeParse({
+    title: fd.get('title') ?? undefined,
+    url: fd.get('url') ?? undefined,
+    examCodes: examCodesRaw.length ? examCodesRaw : undefined,
+    orderIndex: fd.get('orderIndex') ?? undefined,
+  });
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input' };
+  const d = parsed.data;
+
+  const update: Record<string, unknown> = {};
+  if (d.title !== undefined) update.title = d.title;
+  if (d.url !== undefined) update.url = d.url;
+  if (d.examCodes !== undefined) update.exam_codes = d.examCodes;
+  if (d.orderIndex !== undefined) update.order_index = d.orderIndex;
+
+  const { error } = await supabase.from('resources').update(update).eq('id', id);
+  if (error) return { error: error.message };
+  revalidatePath(`/admin/lessons/${lessonId}`);
+  return { ok: true };
+}
+
+// ---------- REORDER ----------
+export async function reorderResourceAction(
+  id: string,
+  lessonId: string,
+  direction: 'up' | 'down'
+): Promise<Result> {
+  const { supabase } = await requireRole('admin');
+  z.string().uuid().parse(id);
+  z.string().uuid().parse(lessonId);
+  z.enum(['up', 'down']).parse(direction);
+
+  const { data: rows } = await supabase
+    .from('resources')
+    .select('id, order_index')
+    .eq('lesson_id', lessonId)
+    .order('order_index');
+  if (!rows) return { error: 'Could not load resources' };
+
+  const idx = rows.findIndex((r) => r.id === id);
+  if (idx < 0) return { error: 'Resource not found' };
+  const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+  if (swapIdx < 0 || swapIdx >= rows.length) return { ok: true };
+
+  const a = rows[idx];
+  const b = rows[swapIdx];
+  await supabase.from('resources').update({ order_index: -1 }).eq('id', a.id);
+  await supabase.from('resources').update({ order_index: a.order_index }).eq('id', b.id);
+  const { error } = await supabase.from('resources').update({ order_index: b.order_index }).eq('id', a.id);
+  if (error) return { error: error.message };
+  revalidatePath(`/admin/lessons/${lessonId}`);
+  return { ok: true };
 }
 
 // ---------- DELETE ----------
@@ -142,7 +205,6 @@ export async function deleteResourceAction(id: string, lessonId: string) {
 
   const admin = createAdminClient();
 
-  // Look up the row first so we can also clean up Storage / Mux
   const { data: row } = await admin
     .from('resources')
     .select('kind, storage_bucket, storage_path, video_provider, video_asset_id')
@@ -156,8 +218,7 @@ export async function deleteResourceAction(id: string, lessonId: string) {
     try {
       await getMux().video.assets.delete(row.video_asset_id);
     } catch {
-      // SECURITY: never block DB delete on a Mux API failure; orphaned assets
-      // can be reconciled by a separate cron job.
+      // Orphaned Mux assets reconciled by separate cron.
     }
   }
 
