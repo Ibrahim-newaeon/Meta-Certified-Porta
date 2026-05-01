@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { LoginForm } from '@/components/shared/login-form';
 
 export default async function LoginPage({
@@ -26,6 +27,13 @@ export default async function LoginPage({
       )}
 
       <LoginForm redirectTo={redirect} />
+
+      <p className="mt-6 text-sm text-slate-600">
+        New here?{' '}
+        <Link href="/register" className="font-medium text-emerald-700 hover:underline">
+          Create an account
+        </Link>
+      </p>
     </div>
   );
 }
