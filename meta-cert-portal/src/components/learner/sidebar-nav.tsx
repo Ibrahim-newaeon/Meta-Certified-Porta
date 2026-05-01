@@ -10,7 +10,7 @@ const items = [
   { href: '/settings', label: 'Settings' },
 ];
 
-export function SidebarNav() {
+export function SidebarNav({ isAdmin = false }: { isAdmin?: boolean }) {
   const pathname = usePathname() ?? '';
   return (
     <nav className="flex flex-col gap-1 p-3">
@@ -24,7 +24,7 @@ export function SidebarNav() {
             className={
               'rounded-md px-3 py-2 text-sm transition-colors ' +
               (active
-                ? 'bg-indigo-50 font-medium text-indigo-700'
+                ? 'bg-emerald-50 font-medium text-emerald-700'
                 : 'text-slate-700 hover:bg-slate-100')
             }
           >
@@ -32,6 +32,17 @@ export function SidebarNav() {
           </Link>
         );
       })}
+      {isAdmin && (
+        <>
+          <div className="mx-3 my-2 border-t" />
+          <Link
+            href="/admin"
+            className="rounded-md bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800 hover:bg-amber-100"
+          >
+            Admin →
+          </Link>
+        </>
+      )}
     </nav>
   );
 }
