@@ -21,11 +21,12 @@ export function SidebarNav({ isAdmin = false }: { isAdmin?: boolean }) {
           <Link
             key={item.href}
             href={item.href}
+            aria-current={active ? 'page' : undefined}
             className={
-              'rounded-md px-3 py-2 text-sm transition-colors ' +
+              'inline-flex h-11 items-center rounded-md px-3 text-sm transition-colors ' +
               (active
-                ? 'bg-emerald-50 font-medium text-emerald-700'
-                : 'text-slate-700 hover:bg-slate-100')
+                ? 'bg-[var(--color-brand-soft)] font-medium text-[var(--color-brand-soft-fg)]'
+                : 'text-[var(--color-text-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--color-text)]')
             }
           >
             {item.label}
@@ -34,10 +35,10 @@ export function SidebarNav({ isAdmin = false }: { isAdmin?: boolean }) {
       })}
       {isAdmin && (
         <>
-          <div className="mx-3 my-2 border-t" />
+          <div className="mx-3 my-2 border-t border-[var(--border)]" />
           <Link
             href="/admin"
-            className="rounded-md bg-amber-50 px-3 py-2 text-sm font-medium text-amber-800 hover:bg-amber-100"
+            className="inline-flex h-11 items-center rounded-md bg-[var(--color-warn-bg)] px-3 text-sm font-medium text-[var(--color-warn-fg)] transition-colors hover:brightness-95"
           >
             Admin →
           </Link>

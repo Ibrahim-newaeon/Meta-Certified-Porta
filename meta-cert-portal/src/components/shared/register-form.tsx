@@ -2,6 +2,8 @@
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
 import { signUpAction, type ActionResult } from '@/app/(auth)/register/actions';
+import { Input } from '@/components/shared/input';
+import { cn } from '@/lib/cn';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -9,7 +11,7 @@ function SubmitButton() {
     <button
       type="submit"
       disabled={pending}
-      className="inline-flex h-10 w-full items-center justify-center rounded-md bg-emerald-600 px-4 text-sm font-medium text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
+      className="inline-flex h-11 w-full items-center justify-center rounded-md bg-[var(--color-brand)] px-4 text-sm font-medium text-[var(--color-brand-fg-on)] transition-colors hover:bg-[var(--color-brand-hover)] disabled:opacity-50"
     >
       {pending ? 'Creating account…' : 'Create account'}
     </button>
@@ -21,7 +23,10 @@ export function RegisterForm() {
 
   if (state?.needsConfirmation) {
     return (
-      <div className="rounded-md border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+      <div
+        role="status"
+        className="rounded-md border border-[var(--color-success-border)] bg-[var(--color-success-bg)] p-4 text-sm text-[var(--color-success-fg)]"
+      >
         Account created. Check your inbox for the confirmation link to activate your
         login.
       </div>
@@ -34,43 +39,47 @@ export function RegisterForm() {
         <label htmlFor="fullName" className="text-sm font-medium">
           Full name
         </label>
-        <input
+        <Input
           id="fullName"
           name="fullName"
           type="text"
           autoComplete="name"
-          className="block h-10 w-full rounded-md border border-slate-300 px-3 text-sm focus:border-emerald-500 focus:outline-none"
+          className={cn('h-11')}
         />
       </div>
       <div className="space-y-1.5">
         <label htmlFor="email" className="text-sm font-medium">
           Email
         </label>
-        <input
+        <Input
           id="email"
           name="email"
           type="email"
           required
           autoComplete="email"
-          className="block h-10 w-full rounded-md border border-slate-300 px-3 text-sm focus:border-emerald-500 focus:outline-none"
+          className="h-11"
         />
       </div>
       <div className="space-y-1.5">
         <label htmlFor="password" className="text-sm font-medium">
           Password
         </label>
-        <input
+        <Input
           id="password"
           name="password"
           type="password"
           required
           minLength={8}
           autoComplete="new-password"
-          className="block h-10 w-full rounded-md border border-slate-300 px-3 text-sm focus:border-emerald-500 focus:outline-none"
+          className="h-11"
         />
-        <p className="text-xs text-slate-500">At least 8 characters.</p>
+        <p className="text-xs text-[var(--color-text-subtle)]">At least 8 characters.</p>
       </div>
-      {state?.error && <p className="text-sm text-red-600">{state.error}</p>}
+      {state?.error && (
+        <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">
+          {state.error}
+        </p>
+      )}
       <SubmitButton />
     </form>
   );

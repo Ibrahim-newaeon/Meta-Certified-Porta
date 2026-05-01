@@ -17,7 +17,7 @@ export default async function LandingPage() {
   const tracks = tracksData ?? [];
 
   return (
-    <div className="min-h-screen bg-white text-slate-900">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--color-text)]">
       <Header isSignedIn={!!user} />
 
       <main>
@@ -36,10 +36,10 @@ export default async function LandingPage() {
 
 function Header({ isSignedIn }: { isSignedIn: boolean }) {
   return (
-    <header className="border-b border-slate-200 bg-white/80 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+    <header className="border-b border-[var(--border)] bg-[var(--surface)]/80 backdrop-blur">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2 font-semibold tracking-tight">
-          <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-gradient-to-br from-emerald-500 to-teal-600 text-xs font-bold text-white">
+          <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-[var(--color-brand)] text-xs font-bold text-[var(--color-brand-fg-on)]">
             M
           </span>
           Meta Cert Portal
@@ -47,20 +47,20 @@ function Header({ isSignedIn }: { isSignedIn: boolean }) {
         <nav className="flex items-center gap-3 text-sm">
           <a
             href="#tracks"
-            className="hidden text-slate-600 hover:text-slate-900 sm:inline"
+            className="hidden text-[var(--color-text-muted)] hover:text-[var(--color-text)] sm:inline"
           >
             Tracks
           </a>
           <a
             href="#features"
-            className="hidden text-slate-600 hover:text-slate-900 sm:inline"
+            className="hidden text-[var(--color-text-muted)] hover:text-[var(--color-text)] sm:inline"
           >
             Features
           </a>
           {isSignedIn ? (
             <Link
               href="/dashboard"
-              className="inline-flex h-9 items-center rounded-md bg-emerald-600 px-4 text-sm font-medium text-white hover:bg-emerald-700"
+              className="inline-flex h-10 items-center rounded-md bg-[var(--color-brand)] px-4 text-sm font-medium text-[var(--color-brand-fg-on)] transition-colors hover:bg-[var(--color-brand-hover)]"
             >
               Go to dashboard
             </Link>
@@ -68,13 +68,13 @@ function Header({ isSignedIn }: { isSignedIn: boolean }) {
             <>
               <Link
                 href="/login"
-                className="inline-flex h-9 items-center rounded-md border border-slate-300 px-4 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                className="inline-flex h-10 items-center rounded-md border border-[var(--border-strong)] bg-[var(--surface)] px-4 text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--surface-muted)]"
               >
                 Sign in
               </Link>
               <Link
                 href="/register"
-                className="inline-flex h-9 items-center rounded-md bg-emerald-600 px-4 text-sm font-medium text-white hover:bg-emerald-700"
+                className="inline-flex h-10 items-center rounded-md bg-[var(--color-brand)] px-4 text-sm font-medium text-[var(--color-brand-fg-on)] transition-colors hover:bg-[var(--color-brand-hover)]"
               >
                 Get started
               </Link>
@@ -89,19 +89,19 @@ function Header({ isSignedIn }: { isSignedIn: boolean }) {
 function Hero({ isSignedIn }: { isSignedIn: boolean }) {
   return (
     <section className="relative overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-emerald-50 via-white to-teal-50" />
-      <div className="pointer-events-none absolute -right-24 top-12 h-72 w-72 rounded-full bg-emerald-200/40 blur-3xl" />
-      <div className="pointer-events-none absolute -left-12 bottom-0 h-72 w-72 rounded-full bg-teal-200/40 blur-3xl" />
+      <div className="pointer-events-none absolute inset-0 bg-[var(--color-brand-soft)] opacity-40 dark:opacity-30" />
+      <div className="pointer-events-none absolute -right-24 top-12 h-72 w-72 rounded-full bg-[var(--color-brand)]/15 blur-3xl" />
+      <div className="pointer-events-none absolute -left-12 bottom-0 h-72 w-72 rounded-full bg-[var(--color-brand)]/10 blur-3xl" />
 
-      <div className="relative mx-auto max-w-6xl px-6 py-20 sm:py-28">
+      <div className="relative mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28">
         <div className="max-w-2xl">
-          <span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-800">
+          <span className="inline-flex items-center rounded-full border border-[var(--color-brand)]/30 bg-[var(--color-brand-soft)] px-3 py-1 text-xs font-medium text-[var(--color-brand-soft-fg)]">
             Meta Blueprint · Practice & study
           </span>
           <h1 className="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl">
             Pass your Meta certification, with a study plan that actually fits.
           </h1>
-          <p className="mt-4 max-w-xl text-lg text-slate-600">
+          <p className="mt-4 max-w-xl text-lg text-[var(--color-text-muted)]">
             Structured tracks, video lessons, downloadable PDFs, AI tutoring, and
             Meta-style practice exams — built for working media buyers and marketers.
           </p>
@@ -109,7 +109,7 @@ function Hero({ isSignedIn }: { isSignedIn: boolean }) {
             {isSignedIn ? (
               <Link
                 href="/dashboard"
-                className="inline-flex h-11 items-center rounded-md bg-emerald-600 px-6 text-sm font-medium text-white shadow-sm hover:bg-emerald-700"
+                className="inline-flex h-11 items-center rounded-md bg-[var(--color-brand)] px-6 text-sm font-medium text-[var(--color-brand-fg-on)] shadow-sm transition-colors hover:bg-[var(--color-brand-hover)]"
               >
                 Continue to dashboard
               </Link>
@@ -117,13 +117,13 @@ function Hero({ isSignedIn }: { isSignedIn: boolean }) {
               <>
                 <Link
                   href="/register"
-                  className="inline-flex h-11 items-center rounded-md bg-emerald-600 px-6 text-sm font-medium text-white shadow-sm hover:bg-emerald-700"
+                  className="inline-flex h-11 items-center rounded-md bg-[var(--color-brand)] px-6 text-sm font-medium text-[var(--color-brand-fg-on)] shadow-sm transition-colors hover:bg-[var(--color-brand-hover)]"
                 >
                   Create free account
                 </Link>
                 <Link
                   href="/login"
-                  className="inline-flex h-11 items-center rounded-md border border-slate-300 bg-white px-6 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  className="inline-flex h-11 items-center rounded-md border border-[var(--border-strong)] bg-[var(--surface)] px-6 text-sm font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--surface-muted)]"
                 >
                   Sign in
                 </Link>
@@ -131,7 +131,7 @@ function Hero({ isSignedIn }: { isSignedIn: boolean }) {
             )}
             <a
               href="#tracks"
-              className="text-sm font-medium text-emerald-700 hover:underline"
+              className="text-sm font-medium text-[var(--color-brand-soft-fg)] hover:underline"
             >
               See certification tracks →
             </a>
@@ -150,14 +150,12 @@ function Stats({ trackCount }: { trackCount: number }) {
     { label: 'Format', value: 'Self-paced' },
   ];
   return (
-    <section className="border-y border-slate-200 bg-slate-50">
-      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-6 px-6 py-10 md:grid-cols-4">
+    <section className="border-y border-[var(--border)] bg-[var(--surface-muted)]">
+      <div className="mx-auto grid max-w-6xl grid-cols-2 gap-6 px-4 py-10 sm:px-6 md:grid-cols-4">
         {items.map((s) => (
           <div key={s.label}>
-            <div className="text-2xl font-semibold tracking-tight text-slate-900">
-              {s.value}
-            </div>
-            <div className="mt-1 text-xs uppercase tracking-wide text-slate-500">
+            <div className="text-2xl font-semibold tracking-tight">{s.value}</div>
+            <div className="mt-1 text-xs uppercase tracking-wide text-[var(--color-text-subtle)]">
               {s.label}
             </div>
           </div>
@@ -180,17 +178,17 @@ function Tracks({
   }>;
 }) {
   return (
-    <section id="tracks" className="mx-auto max-w-6xl px-6 py-20">
+    <section id="tracks" className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
       <div className="mb-10 max-w-2xl">
         <h2 className="text-3xl font-semibold tracking-tight">Certification tracks</h2>
-        <p className="mt-3 text-slate-600">
+        <p className="mt-3 text-[var(--color-text-muted)]">
           Each track maps to a Meta Blueprint certification. Enroll to unlock lessons,
           PDFs, videos, and AI-graded practice exams.
         </p>
       </div>
 
       {tracks.length === 0 ? (
-        <div className="rounded-lg border bg-white p-8 text-center text-sm text-slate-600">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-8 text-center text-sm text-[var(--color-text-muted)]">
           New tracks are being added soon. Create an account to be notified when they
           go live.
         </div>
@@ -199,23 +197,23 @@ function Tracks({
           {tracks.map((t) => (
             <div
               key={t.id}
-              className="flex h-full flex-col rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:border-emerald-200 hover:shadow-md"
+              className="flex h-full flex-col rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm transition hover:border-[var(--color-brand)]/40 hover:shadow-md"
             >
-              <span className="inline-flex w-fit items-center rounded-full bg-emerald-50 px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-emerald-700">
+              <span className="inline-flex w-fit items-center rounded-full bg-[var(--color-brand-soft)] px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-[var(--color-brand-soft-fg)]">
                 {t.code}
               </span>
-              <h3 className="mt-3 text-lg font-semibold text-slate-900">{t.title}</h3>
+              <h3 className="mt-3 text-lg font-semibold">{t.title}</h3>
               {t.description && (
-                <p className="mt-2 line-clamp-3 text-sm text-slate-600">
+                <p className="mt-2 line-clamp-3 text-sm text-[var(--color-text-muted)]">
                   {t.description}
                 </p>
               )}
-              <div className="mt-auto pt-4 text-xs text-slate-500">
+              <div className="mt-auto pt-4 text-xs text-[var(--color-text-subtle)]">
                 {t.exam_minutes} min exam · {t.pass_score}% to pass
               </div>
               <Link
                 href="/register"
-                className="mt-3 inline-flex h-9 w-fit items-center rounded-md bg-emerald-600 px-3 text-sm font-medium text-white hover:bg-emerald-700"
+                className="mt-3 inline-flex h-10 w-fit items-center rounded-md bg-[var(--color-brand)] px-3 text-sm font-medium text-[var(--color-brand-fg-on)] transition-colors hover:bg-[var(--color-brand-hover)]"
               >
                 Enroll free
               </Link>
@@ -255,13 +253,13 @@ function Features() {
     },
   ];
   return (
-    <section id="features" className="border-t border-slate-200 bg-slate-50">
-      <div className="mx-auto max-w-6xl px-6 py-20">
+    <section id="features" className="border-t border-[var(--border)] bg-[var(--surface-muted)]">
+      <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <div className="mb-10 max-w-2xl">
           <h2 className="text-3xl font-semibold tracking-tight">
             Everything you need to study and pass
           </h2>
-          <p className="mt-3 text-slate-600">
+          <p className="mt-3 text-[var(--color-text-muted)]">
             Built specifically for Meta certification candidates, not a generic LMS.
           </p>
         </div>
@@ -269,10 +267,10 @@ function Features() {
           {features.map((f) => (
             <div
               key={f.title}
-              className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+              className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm"
             >
-              <h3 className="font-semibold text-slate-900">{f.title}</h3>
-              <p className="mt-2 text-sm text-slate-600">{f.body}</p>
+              <h3 className="font-semibold">{f.title}</h3>
+              <p className="mt-2 text-sm text-[var(--color-text-muted)]">{f.body}</p>
             </div>
           ))}
         </div>
@@ -305,22 +303,24 @@ function HowItWorks() {
     },
   ];
   return (
-    <section className="mx-auto max-w-6xl px-6 py-20">
+    <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
       <div className="mb-10 max-w-2xl">
         <h2 className="text-3xl font-semibold tracking-tight">How it works</h2>
-        <p className="mt-3 text-slate-600">From signup to pass, in four steps.</p>
+        <p className="mt-3 text-[var(--color-text-muted)]">
+          From signup to pass, in four steps.
+        </p>
       </div>
       <ol className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         {steps.map((s) => (
           <li
             key={s.n}
-            className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+            className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6 shadow-sm"
           >
-            <div className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100 text-sm font-semibold text-emerald-800">
+            <div className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-brand-soft)] text-sm font-semibold text-[var(--color-brand-soft-fg)]">
               {s.n}
             </div>
-            <h3 className="mt-4 font-semibold text-slate-900">{s.title}</h3>
-            <p className="mt-1 text-sm text-slate-600">{s.body}</p>
+            <h3 className="mt-4 font-semibold">{s.title}</h3>
+            <p className="mt-1 text-sm text-[var(--color-text-muted)]">{s.body}</p>
           </li>
         ))}
       </ol>
@@ -330,13 +330,16 @@ function HowItWorks() {
 
 function FinalCta({ isSignedIn }: { isSignedIn: boolean }) {
   return (
-    <section className="bg-gradient-to-br from-emerald-700 via-teal-700 to-cyan-800 text-white">
-      <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-6 py-16 md:flex-row md:items-center">
+    <section
+      className="text-white"
+      style={{ background: 'var(--color-brand-gradient)' }}
+    >
+      <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-4 py-16 sm:px-6 md:flex-row md:items-center">
         <div className="max-w-2xl">
           <h2 className="text-3xl font-semibold tracking-tight">
             Ready to get certified?
           </h2>
-          <p className="mt-2 text-emerald-100">
+          <p className="mt-2 text-white/80">
             Free to start. Pick a track, study with AI, pass the exam.
           </p>
         </div>
@@ -344,7 +347,7 @@ function FinalCta({ isSignedIn }: { isSignedIn: boolean }) {
           {isSignedIn ? (
             <Link
               href="/dashboard"
-              className="inline-flex h-11 items-center rounded-md bg-white px-6 text-sm font-medium text-emerald-700 shadow-sm hover:bg-emerald-50"
+              className="inline-flex h-11 items-center rounded-md bg-white px-6 text-sm font-medium text-[var(--color-brand-soft-fg)] shadow-sm transition-colors hover:bg-white/90"
             >
               Go to dashboard
             </Link>
@@ -352,13 +355,13 @@ function FinalCta({ isSignedIn }: { isSignedIn: boolean }) {
             <>
               <Link
                 href="/register"
-                className="inline-flex h-11 items-center rounded-md bg-white px-6 text-sm font-medium text-emerald-700 shadow-sm hover:bg-emerald-50"
+                className="inline-flex h-11 items-center rounded-md bg-white px-6 text-sm font-medium text-[var(--color-brand-soft-fg)] shadow-sm transition-colors hover:bg-white/90"
               >
                 Create free account
               </Link>
               <Link
                 href="/login"
-                className="inline-flex h-11 items-center rounded-md border border-white/40 bg-transparent px-6 text-sm font-medium text-white hover:bg-white/10"
+                className="inline-flex h-11 items-center rounded-md border border-white/40 bg-transparent px-6 text-sm font-medium text-white transition-colors hover:bg-white/10"
               >
                 Sign in
               </Link>
@@ -372,14 +375,14 @@ function FinalCta({ isSignedIn }: { isSignedIn: boolean }) {
 
 function Footer() {
   return (
-    <footer className="border-t border-slate-200 bg-white">
-      <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-3 px-6 py-8 text-sm text-slate-500 sm:flex-row sm:items-center">
+    <footer className="border-t border-[var(--border)] bg-[var(--surface)]">
+      <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-3 px-4 py-8 text-sm text-[var(--color-text-subtle)] sm:flex-row sm:items-center sm:px-6">
         <div>© {new Date().getFullYear()} Meta Cert Portal</div>
         <div className="flex gap-4">
-          <Link href="/login" className="hover:text-slate-900">
+          <Link href="/login" className="hover:text-[var(--color-text)]">
             Sign in
           </Link>
-          <Link href="/register" className="hover:text-slate-900">
+          <Link href="/register" className="hover:text-[var(--color-text)]">
             Sign up
           </Link>
         </div>

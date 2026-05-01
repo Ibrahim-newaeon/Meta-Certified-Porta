@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { requireUser } from '@/lib/auth/roles';
+import { Badge } from '@/components/shared/badge';
 
 export default async function ExamsPage() {
   const { user, supabase } = await requireUser();
@@ -14,22 +15,22 @@ export default async function ExamsPage() {
     .limit(50);
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6 p-4 sm:p-6">
       <div>
         <h1 className="text-2xl font-semibold">Exams</h1>
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="mt-1 text-sm text-[var(--color-text-muted)]">
           Your recent quiz and mock-exam attempts.
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-lg border bg-white">
+      <div className="overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--surface)]">
         {(attempts ?? []).length === 0 ? (
-          <div className="p-6 text-center text-sm text-slate-600">
+          <div className="p-6 text-center text-sm text-[var(--color-text-muted)]">
             No exam attempts yet. Open a track and start a quiz from any lesson.
           </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
+            <thead className="bg-[var(--surface-muted)] text-left text-xs uppercase text-[var(--color-text-muted)]">
               <tr>
                 <th className="px-3 py-2">Quiz</th>
                 <th className="px-3 py-2">Kind</th>
@@ -47,24 +48,37 @@ export default async function ExamsPage() {
                   a.status === 'submitted' && q?.id ? (
                     <Link
                       href={`/exam/${q.id}/result`}
-                      className="text-slate-900 hover:underline"
+                      className="text-[var(--color-text)] hover:underline"
                     >
                       {q.title}
                     </Link>
                   ) : (
                     q?.title ?? 'Quiz'
                   );
+                const scored = a.score !== null && a.score !== undefined;
+                const statusBadge =
+                  a.status === 'submitted' ? (
+                    a.passed ? (
+                      <Badge variant="success">Passed</Badge>
+                    ) : (
+                      <Badge variant="warn">Did not pass</Badge>
+                    )
+                  ) : a.status === 'expired' ? (
+                    <Badge variant="danger">Expired</Badge>
+                  ) : (
+                    <Badge variant="neutral">In progress</Badge>
+                  );
                 return (
-                  <tr key={a.id} className="border-t">
+                  <tr key={a.id} className="border-t border-[var(--border)]">
                     <td className="px-3 py-2">{titleCell}</td>
-                    <td className="px-3 py-2 capitalize text-slate-600">{q?.kind ?? '—'}</td>
-                    <td className="px-3 py-2 capitalize">{a.status.replace('_', ' ')}</td>
-                    <td className="px-3 py-2">
-                      {a.score !== null && a.score !== undefined
-                        ? `${a.score}%${a.passed ? ' · passed' : ''}`
-                        : '—'}
+                    <td className="px-3 py-2 capitalize text-[var(--color-text-muted)]">
+                      {q?.kind ?? '—'}
                     </td>
-                    <td className="px-3 py-2 text-slate-500">
+                    <td className="px-3 py-2">{statusBadge}</td>
+                    <td className="px-3 py-2 tabular-nums">
+                      {scored ? `${a.score}%` : '—'}
+                    </td>
+                    <td className="px-3 py-2 text-[var(--color-text-subtle)]">
                       {new Date(a.started_at).toLocaleString()}
                     </td>
                   </tr>
