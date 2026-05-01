@@ -59,23 +59,31 @@ export default async function ExamResultPage({
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 p-6">
-      <Link href="/dashboard" className="text-xs text-slate-500 hover:underline">
+      <Link href="/dashboard" className="text-xs text-[var(--color-text-muted)] hover:underline">
         ← Dashboard
       </Link>
 
       <div
         className={`rounded-lg border p-6 ${
-          passed ? 'border-emerald-300 bg-emerald-50' : 'border-amber-300 bg-amber-50'
+          passed
+            ? 'border-[var(--color-success-border)] bg-[var(--color-success-bg)]'
+            : 'border-[var(--color-warn-fg)]/40 bg-[var(--color-warn-bg)]'
         }`}
       >
-        <div className="text-xs uppercase text-slate-600">{quiz.title}</div>
+        <div className="text-xs uppercase text-[var(--color-text-muted)]">{quiz.title}</div>
         <div className="mt-1 text-3xl font-semibold">
           {Math.round(score)}%{' '}
-          <span className={passed ? 'text-emerald-700' : 'text-amber-700'}>
+          <span
+            className={
+              passed
+                ? 'text-[var(--color-success-fg)]'
+                : 'text-[var(--color-warn-fg)]'
+            }
+          >
             {passed ? '· Passed' : '· Did not pass'}
           </span>
         </div>
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="mt-1 text-sm text-[var(--color-text-muted)]">
           Pass mark: {quiz.pass_score}%{' '}
           {attempt.status === 'expired' && '(time expired)'}
         </p>
@@ -89,13 +97,13 @@ export default async function ExamResultPage({
             return (
               <li
                 key={q.id}
-                className="flex items-start gap-3 rounded-md border bg-white p-3"
+                className="flex items-start gap-3 rounded-md border border-[var(--border)] bg-[var(--surface)] p-3"
               >
                 <span
                   className={`mt-0.5 inline-flex h-6 w-6 flex-none items-center justify-center rounded-full text-xs font-bold ${
                     correct
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : 'bg-red-100 text-red-800'
+                      ? 'bg-[var(--color-success-bg)] text-[var(--color-success-fg)]'
+                      : 'bg-[var(--color-danger-bg)] text-[var(--color-danger-fg)]'
                   }`}
                 >
                   {correct ? '✓' : '✗'}
@@ -105,7 +113,7 @@ export default async function ExamResultPage({
                     {i + 1}. {q.prompt}
                   </div>
                   {q.explanation && (
-                    <p className="mt-1 text-slate-600">{q.explanation}</p>
+                    <p className="mt-1 text-[var(--color-text-muted)]">{q.explanation}</p>
                   )}
                 </div>
               </li>

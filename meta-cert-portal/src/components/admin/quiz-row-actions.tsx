@@ -1,19 +1,19 @@
 'use client';
-import { useTransition } from 'react';
 import { deleteQuizAction } from '@/app/admin/quizzes/actions';
+import { ConfirmButton } from '@/components/shared/confirm-button';
 
 export function DeleteQuizButton({ id, title }: { id: string; title: string }) {
-  const [pending, start] = useTransition();
   return (
-    <button
-      onClick={() => {
-        if (!confirm(`Delete quiz "${title}" and all its questions?`)) return;
-        start(() => deleteQuizAction(id).then(() => {}));
+    <ConfirmButton
+      label="Delete"
+      title={`Delete quiz "${title}"?`}
+      description="All questions in this quiz will be removed. This cannot be undone."
+      confirmLabel="Delete quiz"
+      variant="danger"
+      triggerSize="sm"
+      onConfirm={async () => {
+        await deleteQuizAction(id);
       }}
-      disabled={pending}
-      className="text-xs text-red-600 hover:text-red-800 disabled:opacity-50"
-    >
-      Delete
-    </button>
+    />
   );
 }

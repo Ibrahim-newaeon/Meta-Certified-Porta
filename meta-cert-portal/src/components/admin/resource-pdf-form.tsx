@@ -1,15 +1,22 @@
 'use client';
-import { useState, useTransition } from 'react';
+import { useId, useState, useTransition } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { finalizePdfResourceAction } from '@/app/admin/resources/actions';
+import { Button } from '@/components/shared/button';
 
 const MAX_BYTES = 50 * 1024 * 1024; // 50 MB
+const INPUT_CLS =
+  'mt-1 block h-10 w-full rounded-md border border-[var(--border-strong)] bg-[var(--surface)] px-2 text-sm text-[var(--color-text)] focus:border-[var(--color-focus-ring)] focus:ring-2 focus:ring-[var(--color-focus-ring)]/20 focus:outline-none';
+const LABEL_CLS = 'block text-xs font-medium text-[var(--color-text-muted)]';
 
 export function ResourcePdfForm({ lessonId }: { lessonId: string }) {
   const [pending, start] = useTransition();
   const [pct, setPct] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState(false);
+  const titleId = useId();
+  const fileId = useId();
+  const orderId = useId();
 
   async function onSubmit(fd: FormData) {
     setError(null);
@@ -21,7 +28,6 @@ export function ResourcePdfForm({ lessonId }: { lessonId: string }) {
 
     if (!file) return setError('Choose a PDF file');
     if (file.type !== 'application/pdf') return setError('PDF only');
-    // SECURITY: client-side size guard. Storage policy + bucket settings cap server-side.
     if (file.size > MAX_BYTES) return setError(`Max ${MAX_BYTES / 1024 / 1024} MB`);
 
     const supabase = createClient();
@@ -43,65 +49,81 @@ export function ResourcePdfForm({ lessonId }: { lessonId: string }) {
       orderIndex,
     });
     if (res?.error) {
-      // Try to clean up the orphaned object
       await supabase.storage.from('resource-pdfs').remove([path]);
       return setError(res.error);
     }
     setPct(100);
     setOk(true);
-    // Reload to show the new resource
     setTimeout(() => window.location.reload(), 600);
   }
+
+  const pendingLabel =
+    pct === 0 ? 'Preparing…' : pct < 60 ? `Uploading… ${pct}%` : pct < 100 ? 'Saving…' : 'Done';
 
   return (
     <form
       action={(fd) => start(() => onSubmit(fd))}
-      className="space-y-3 rounded-lg border bg-white p-4"
+      className="space-y-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4"
     >
       <div>
-        <label className="text-xs font-medium text-slate-600">Title</label>
-        <input
-          name="title"
-          required
-          className="mt-1 block h-9 w-full rounded-md border border-slate-300 px-2 text-sm"
-        />
+        <label htmlFor={titleId} className={LABEL_CLS}>
+          Title
+        </label>
+        <input id={titleId} name="title" required className={INPUT_CLS} />
       </div>
       <div>
-        <label className="text-xs font-medium text-slate-600">PDF file (max 50 MB)</label>
+        <label htmlFor={fileId} className={LABEL_CLS}>
+          PDF file (max 50 MB)
+        </label>
         <input
+          id={fileId}
           name="file"
           type="file"
           accept="application/pdf"
           required
-          className="mt-1 block w-full text-sm"
+          className="mt-1 block w-full text-sm file:mr-3 file:h-10 file:rounded-md file:border-0 file:bg-[var(--color-primary)] file:px-3 file:text-xs file:font-medium file:text-[var(--color-primary-fg)] hover:file:bg-[var(--color-primary-hover)]"
         />
       </div>
       <div>
-        <label className="text-xs font-medium text-slate-600">Order</label>
+        <label htmlFor={orderId} className={LABEL_CLS}>
+          Order
+        </label>
         <input
+          id={orderId}
           name="orderIndex"
           type="number"
           defaultValue={0}
-          className="mt-1 block h-9 w-full rounded-md border border-slate-300 px-2 text-sm"
+          className={INPUT_CLS}
         />
       </div>
       {pct > 0 && (
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
+        <div
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={pct}
+          aria-label="Upload progress"
+          className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--surface-muted)]"
+        >
           <div
-            className="h-full bg-slate-900 transition-all"
-            style={{ width: `${pct}%` }}
+            className="h-full origin-left bg-[var(--color-primary)] transition-transform duration-200"
+            style={{ transform: `scaleX(${pct / 100})` }}
           />
         </div>
       )}
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      {ok && <p className="text-sm text-green-600">Uploaded — refreshing…</p>}
-      <button
-        type="submit"
-        disabled={pending}
-        className="inline-flex h-9 items-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-      >
-        {pending ? 'Uploading…' : 'Upload PDF'}
-      </button>
+      {error && (
+        <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">
+          {error}
+        </p>
+      )}
+      {ok && (
+        <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">
+          Uploaded — refreshing…
+        </p>
+      )}
+      <Button type="submit" disabled={pending}>
+        {pending ? pendingLabel : 'Upload PDF'}
+      </Button>
     </form>
   );
 }

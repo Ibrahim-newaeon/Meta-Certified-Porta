@@ -12,12 +12,15 @@ export default async function LoginPage({
       <h1 className="mb-2 text-2xl font-semibold tracking-tight">
         Sign in to Meta Cert Portal
       </h1>
-      <p className="mb-6 text-sm text-slate-600">
+      <p className="mb-6 text-sm text-[var(--color-text-muted)]">
         Use your email + password, or get a magic link in your inbox.
       </p>
 
       {error === 'auth' && (
-        <div className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <div
+          role="alert"
+          className="mb-4 rounded-md border border-[var(--color-danger-border)] bg-[var(--color-danger-bg)] p-3 text-sm text-[var(--color-danger-fg)]"
+        >
           That sign-in link was invalid or expired. Try again.
         </div>
       )}

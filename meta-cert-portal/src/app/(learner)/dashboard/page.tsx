@@ -32,12 +32,12 @@ export default async function Dashboard() {
       <h1 className="text-2xl font-semibold">Welcome back</h1>
 
       {recentLesson && (
-        <div className="rounded-lg border bg-white p-4">
-          <div className="text-xs uppercase text-slate-500">Continue where you left off</div>
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4">
+          <div className="text-xs uppercase text-[var(--color-text-muted)]">Continue where you left off</div>
           <div className="mt-1 text-lg font-medium">{recentLesson.title}</div>
           <Link
             href={`/lessons/${recentLesson.id}`}
-            className="mt-3 inline-flex h-9 items-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
+            className="mt-3 inline-flex h-11 items-center rounded-md bg-[var(--color-primary)] px-5 text-sm font-medium text-[var(--color-primary-fg)] transition-colors hover:bg-[var(--color-primary-hover)]"
           >
             Resume
           </Link>
@@ -47,35 +47,35 @@ export default async function Dashboard() {
       <section>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-semibold">Your certifications</h2>
-          <Link href="/tracks" className="text-sm text-slate-600 hover:underline">
+          <Link href="/tracks" className="text-sm text-[var(--color-text-muted)] hover:underline">
             Browse all tracks →
           </Link>
         </div>
         {enrollments.length === 0 ? (
-          <div className="rounded-lg border bg-white p-6 text-center text-sm text-slate-600">
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-6 text-center text-sm text-[var(--color-text-muted)]">
             You haven&apos;t enrolled in any certification tracks yet.{' '}
-            <Link href="/tracks" className="text-slate-900 underline">
+            <Link href="/tracks" className="text-[var(--color-text)] underline">
               Browse tracks
             </Link>
             .
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {enrollments.map((e) => {
               const track = Array.isArray(e.certification_tracks)
                 ? e.certification_tracks[0]
                 : e.certification_tracks;
               if (!track) return null;
               return (
-                <div key={e.track_id} className="rounded-lg border bg-white p-4">
-                  <div className="font-mono text-xs text-slate-500">{track.code}</div>
+                <div key={e.track_id} className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4">
+                  <div className="font-mono text-xs text-[var(--color-text-muted)]">{track.code}</div>
                   <div className="mt-1 font-semibold">{track.title}</div>
                   {track.description && (
-                    <p className="mt-2 line-clamp-3 text-sm text-slate-600">{track.description}</p>
+                    <p className="mt-2 line-clamp-3 text-sm text-[var(--color-text-muted)]">{track.description}</p>
                   )}
                   <Link
                     href={`/tracks/${track.id}`}
-                    className="mt-3 inline-flex h-9 items-center rounded-md border border-slate-300 px-3 text-sm hover:bg-slate-50"
+                    className="mt-3 inline-flex h-10 items-center rounded-md border border-[var(--border-strong)] bg-[var(--surface)] px-3 text-sm hover:bg-[var(--surface-muted)]"
                   >
                     Open track
                   </Link>

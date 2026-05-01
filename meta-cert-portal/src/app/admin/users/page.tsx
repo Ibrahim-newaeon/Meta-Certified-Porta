@@ -1,5 +1,6 @@
 import { requireRole } from '@/lib/auth/roles';
 import { InviteUserForm, RoleToggle } from '@/components/admin/users-table-actions';
+import { Badge } from '@/components/shared/badge';
 
 export default async function UsersAdminPage() {
   const { user, supabase } = await requireRole('admin');
@@ -15,15 +16,15 @@ export default async function UsersAdminPage() {
       <h1 className="text-2xl font-semibold">Users</h1>
 
       <section>
-        <h2 className="mb-2 text-sm font-medium text-slate-700">Invite user</h2>
+        <h2 className="mb-2 text-sm font-medium text-[var(--color-text-muted)]">Invite user</h2>
         <InviteUserForm />
       </section>
 
       <section>
-        <h2 className="mb-2 text-sm font-medium text-slate-700">All users</h2>
-        <div className="overflow-hidden rounded-lg border bg-white">
+        <h2 className="mb-2 text-sm font-medium text-[var(--color-text-muted)]">All users</h2>
+        <div className="overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--surface)]">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
+            <thead className="bg-[var(--surface-muted)] text-left text-xs uppercase text-[var(--color-text-muted)]">
               <tr>
                 <th className="px-3 py-2">Email</th>
                 <th className="px-3 py-2">Name</th>
@@ -34,26 +35,20 @@ export default async function UsersAdminPage() {
             </thead>
             <tbody>
               {(users ?? []).map((u) => (
-                <tr key={u.id} className="border-t">
+                <tr key={u.id} className="border-t border-[var(--border)]">
                   <td className="px-3 py-2">
                     {u.email}
                     {u.id === user.id && (
-                      <span className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px]">you</span>
+                      <Badge variant="neutral" className="ml-2">you</Badge>
                     )}
                   </td>
                   <td className="px-3 py-2">{u.full_name ?? '—'}</td>
                   <td className="px-3 py-2">
-                    <span
-                      className={`rounded-md px-2 py-0.5 text-xs font-medium ${
-                        u.role === 'admin'
-                          ? 'bg-amber-100 text-amber-800'
-                          : 'bg-slate-100 text-slate-700'
-                      }`}
-                    >
+                    <Badge variant={u.role === 'admin' ? 'warn' : 'neutral'}>
                       {u.role}
-                    </span>
+                    </Badge>
                   </td>
-                  <td className="px-3 py-2 text-xs text-slate-500">
+                  <td className="px-3 py-2 text-xs text-[var(--color-text-muted)]">
                     {new Date(u.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-3 py-2 text-right">
@@ -67,7 +62,7 @@ export default async function UsersAdminPage() {
               ))}
               {(!users || users.length === 0) && (
                 <tr>
-                  <td colSpan={5} className="px-3 py-6 text-center text-slate-500">
+                  <td colSpan={5} className="px-3 py-6 text-center text-[var(--color-text-muted)]">
                     No users yet.
                   </td>
                 </tr>

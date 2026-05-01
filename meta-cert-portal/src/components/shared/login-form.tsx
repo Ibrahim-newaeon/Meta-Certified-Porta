@@ -1,27 +1,26 @@
 'use client';
-import { useActionState, useState } from 'react';
+import { useActionState, useId, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import {
   signInAction,
   sendMagicLinkAction,
   type ActionResult,
 } from '@/app/(auth)/login/actions';
+import { Button } from './button';
+import { Input } from './input';
 
-// NOTE: shadcn/ui isn't installed (registry blocked in setup environment).
-// These components use plain HTML + Tailwind classes that mirror shadcn naming
-// so swapping in real shadcn <Button>, <Input>, <Label>, <Tabs> is a one-line
-// import change once `shadcn add` runs locally.
-
-function SubmitButton({ children }: { children: React.ReactNode }) {
+function SubmitButton({
+  pendingLabel,
+  children,
+}: {
+  pendingLabel: string;
+  children: React.ReactNode;
+}) {
   const { pending } = useFormStatus();
   return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="inline-flex h-10 w-full items-center justify-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white transition-colors hover:bg-slate-800 disabled:opacity-50"
-    >
-      {pending ? 'Working…' : children}
-    </button>
+    <Button type="submit" size="lg" block disabled={pending}>
+      {pending ? pendingLabel : children}
+    </Button>
   );
 }
 
@@ -30,74 +29,132 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
   const [pwState, pwAction] = useActionState<ActionResult, FormData>(signInAction, null);
   const [mlState, mlAction] = useActionState<ActionResult, FormData>(sendMagicLinkAction, null);
 
+  const pwTabId = useId();
+  const mlTabId = useId();
+  const pwPanelId = useId();
+  const mlPanelId = useId();
+  const pwEmailId = useId();
+  const pwPasswordId = useId();
+  const mlEmailId = useId();
+
   return (
     <div className="w-full">
-      <div role="tablist" className="mb-4 grid grid-cols-2 rounded-md bg-slate-100 p-1 text-sm">
+      <div
+        role="tablist"
+        aria-label="Sign-in method"
+        className="mb-4 grid grid-cols-2 rounded-md bg-[var(--color-neutral-bg)] p-1 text-sm"
+      >
         <button
+          type="button"
           role="tab"
+          id={pwTabId}
           aria-selected={tab === 'password'}
+          aria-controls={pwPanelId}
+          tabIndex={tab === 'password' ? 0 : -1}
           onClick={() => setTab('password')}
-          className={`rounded-md py-1.5 transition ${tab === 'password' ? 'bg-white shadow-sm' : 'text-slate-600'}`}
+          className={`h-11 rounded-md transition-colors ${
+            tab === 'password'
+              ? 'bg-[var(--surface)] text-[var(--color-text)] shadow-sm'
+              : 'text-[var(--color-text-muted)]'
+          }`}
         >
           Password
         </button>
         <button
+          type="button"
           role="tab"
+          id={mlTabId}
           aria-selected={tab === 'magic'}
+          aria-controls={mlPanelId}
+          tabIndex={tab === 'magic' ? 0 : -1}
           onClick={() => setTab('magic')}
-          className={`rounded-md py-1.5 transition ${tab === 'magic' ? 'bg-white shadow-sm' : 'text-slate-600'}`}
+          className={`h-11 rounded-md transition-colors ${
+            tab === 'magic'
+              ? 'bg-[var(--surface)] text-[var(--color-text)] shadow-sm'
+              : 'text-[var(--color-text-muted)]'
+          }`}
         >
           Magic link
         </button>
       </div>
 
       {tab === 'password' && (
-        <form action={pwAction} className="space-y-4">
+        <form
+          action={pwAction}
+          role="tabpanel"
+          id={pwPanelId}
+          aria-labelledby={pwTabId}
+          className="space-y-4"
+        >
           {redirectTo && <input type="hidden" name="redirectTo" value={redirectTo} />}
           <div className="space-y-1.5">
-            <label htmlFor="email" className="text-sm font-medium">Email</label>
-            <input
-              id="email"
+            <label htmlFor={pwEmailId} className="block text-sm font-medium">
+              Email
+            </label>
+            <Input
+              id={pwEmailId}
               name="email"
               type="email"
               required
               autoComplete="email"
-              className="block h-10 w-full rounded-md border border-slate-300 px-3 text-sm focus:border-slate-500 focus:outline-none"
+              className="h-11"
             />
           </div>
           <div className="space-y-1.5">
-            <label htmlFor="password" className="text-sm font-medium">Password</label>
-            <input
-              id="password"
+            <label htmlFor={pwPasswordId} className="block text-sm font-medium">
+              Password
+            </label>
+            <Input
+              id={pwPasswordId}
               name="password"
               type="password"
               required
               minLength={8}
               autoComplete="current-password"
-              className="block h-10 w-full rounded-md border border-slate-300 px-3 text-sm focus:border-slate-500 focus:outline-none"
+              className="h-11"
             />
           </div>
-          {pwState?.error && <p className="text-sm text-red-600">{pwState.error}</p>}
-          <SubmitButton>Sign in</SubmitButton>
+          {pwState?.error && (
+            <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">
+              {pwState.error}
+            </p>
+          )}
+          <SubmitButton pendingLabel="Signing in…">Sign in</SubmitButton>
         </form>
       )}
 
       {tab === 'magic' && (
-        <form action={mlAction} className="space-y-4">
+        <form
+          action={mlAction}
+          role="tabpanel"
+          id={mlPanelId}
+          aria-labelledby={mlTabId}
+          className="space-y-4"
+        >
           <div className="space-y-1.5">
-            <label htmlFor="ml-email" className="text-sm font-medium">Email</label>
-            <input
-              id="ml-email"
+            <label htmlFor={mlEmailId} className="block text-sm font-medium">
+              Email
+            </label>
+            <Input
+              id={mlEmailId}
               name="email"
               type="email"
               required
               autoComplete="email"
-              className="block h-10 w-full rounded-md border border-slate-300 px-3 text-sm focus:border-slate-500 focus:outline-none"
+              className="h-11"
             />
           </div>
-          {mlState?.error && <p className="text-sm text-red-600">{mlState.error}</p>}
-          {mlState?.ok && <p className="text-sm text-green-600">Check your inbox for the link.</p>}
-          <SubmitButton>Send magic link</SubmitButton>
+          {mlState?.error && (
+            <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">
+              {mlState.error}
+            </p>
+          )}
+          {mlState?.ok && (
+            <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">
+              Check your inbox for the link.
+            </p>
+          )}
+          <SubmitButton pendingLabel="Sending link…">Send magic link</SubmitButton>
         </form>
       )}
     </div>

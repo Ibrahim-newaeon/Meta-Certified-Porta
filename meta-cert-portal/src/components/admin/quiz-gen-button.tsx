@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { Button } from '@/components/shared/button';
 
 export function QuizGenButton({ lessonId, examCodes }: { lessonId: string; examCodes: string[] }) {
   const [busy, setBusy] = useState(false);
@@ -32,16 +33,20 @@ export function QuizGenButton({ lessonId, examCodes }: { lessonId: string; examC
   }
 
   return (
-    <div className="flex items-center gap-3">
-      <button
-        onClick={generate}
-        disabled={busy}
-        className="inline-flex h-9 items-center rounded-md border border-slate-300 bg-white px-4 text-sm font-medium hover:bg-slate-50 disabled:opacity-50"
-      >
+    <div className="flex flex-wrap items-center gap-3">
+      <Button variant="secondary" onClick={generate} disabled={busy}>
         {busy ? 'Generating quiz…' : 'Generate quiz from PDF'}
-      </button>
-      {msg && <span className="text-xs text-green-700">{msg}</span>}
-      {err && <span className="text-xs text-red-600">{err}</span>}
+      </Button>
+      {msg && (
+        <span role="status" className="text-xs text-emerald-700 dark:text-emerald-300">
+          {msg}
+        </span>
+      )}
+      {err && (
+        <span role="alert" className="text-xs text-rose-700 dark:text-rose-300">
+          {err}
+        </span>
+      )}
     </div>
   );
 }
