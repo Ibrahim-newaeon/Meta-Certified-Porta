@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { requireRole } from '@/lib/auth/roles';
-import { TrackCreateForm } from '@/components/admin/track-form';
+import { TrackCreateForm, TrackEditButton } from '@/components/admin/track-form';
 import { PublishToggle, DeleteTrackButton } from '@/components/admin/track-row-actions';
 
 export default async function TracksAdminPage() {
@@ -8,7 +8,7 @@ export default async function TracksAdminPage() {
 
   const { data: tracks } = await supabase
     .from('certification_tracks')
-    .select('id, code, title, slug, is_published, exam_minutes, pass_score, created_at')
+    .select('id, code, title, slug, description, is_published, exam_minutes, pass_score, created_at')
     .order('code');
 
   return (
@@ -33,7 +33,7 @@ export default async function TracksAdminPage() {
                 <th className="px-3 py-2">Status</th>
                 <th className="px-3 py-2">Exam (min)</th>
                 <th className="px-3 py-2">Pass %</th>
-                <th className="px-3 py-2"></th>
+                <th className="px-3 py-2 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -41,7 +41,10 @@ export default async function TracksAdminPage() {
                 <tr key={t.id} className="border-t">
                   <td className="px-3 py-2 font-mono">{t.code}</td>
                   <td className="px-3 py-2">
-                    <Link href={`/admin/tracks/${t.id}`} className="text-slate-900 hover:underline">
+                    <Link
+                      href={`/admin/tracks/${t.id}`}
+                      className="text-slate-900 hover:underline"
+                    >
                       {t.title}
                     </Link>
                   </td>
@@ -50,8 +53,21 @@ export default async function TracksAdminPage() {
                   </td>
                   <td className="px-3 py-2">{t.exam_minutes}</td>
                   <td className="px-3 py-2">{t.pass_score}</td>
-                  <td className="px-3 py-2 text-right">
-                    <DeleteTrackButton id={t.id} code={t.code} />
+                  <td className="px-3 py-2">
+                    <div className="flex items-center justify-end gap-3">
+                      <TrackEditButton
+                        track={{
+                          id: t.id,
+                          code: t.code,
+                          title: t.title,
+                          slug: t.slug,
+                          description: t.description ?? null,
+                          examMinutes: t.exam_minutes,
+                          passScore: t.pass_score,
+                        }}
+                      />
+                      <DeleteTrackButton id={t.id} code={t.code} />
+                    </div>
                   </td>
                 </tr>
               ))}

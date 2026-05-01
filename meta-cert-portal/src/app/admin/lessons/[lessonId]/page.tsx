@@ -4,8 +4,9 @@ import { requireRole } from '@/lib/auth/roles';
 import { ResourceLinkForm } from '@/components/admin/resource-link-form';
 import { ResourcePdfForm } from '@/components/admin/resource-pdf-form';
 import { ResourceVideoForm } from '@/components/admin/resource-video-form';
-import { DeleteResourceButton } from '@/components/admin/delete-resource-button';
+import { ResourceRowActions } from '@/components/admin/resource-row-actions';
 import { QuizGenButton } from '@/components/admin/quiz-gen-button';
+import { LessonHeaderEdit } from '@/components/admin/lesson-header-edit';
 
 type ResourceRow = {
   id: string;
@@ -32,12 +33,13 @@ export default async function LessonAdminPage({
 
   const { data: lesson } = await supabase
     .from('lessons')
-    .select('id, title, summary, est_minutes, module_id, modules!inner(track_id, title)')
+    .select(
+      'id, title, summary, est_minutes, order_index, module_id, modules!inner(track_id, title)'
+    )
     .eq('id', lessonId)
     .single();
   if (!lesson) notFound();
 
-  // Supabase typings model joins as arrays even when the FK is to-one.
   const moduleRow = Array.isArray(lesson.modules)
     ? lesson.modules[0]
     : (lesson.modules as { track_id: string; title: string } | null);
@@ -65,11 +67,29 @@ export default async function LessonAdminPage({
             ← Track
           </Link>
         )}
-        <h1 className="mt-1 text-2xl font-semibold">{lesson.title}</h1>
-        <p className="text-sm text-slate-500">
-          {lesson.est_minutes ?? 0} min ·{' '}
-          Module: {moduleTitle ?? '—'}
-        </p>
+        <div className="mt-1 flex items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-semibold">{lesson.title}</h1>
+            <p className="text-sm text-slate-500">
+              {lesson.est_minutes ?? 0} min · Module: {moduleTitle ?? '—'}
+            </p>
+            {lesson.summary && (
+              <p className="mt-2 max-w-2xl text-sm text-slate-700">{lesson.summary}</p>
+            )}
+          </div>
+          {trackId && (
+            <LessonHeaderEdit
+              lesson={{
+                id: lesson.id,
+                title: lesson.title,
+                summary: lesson.summary ?? null,
+                est_minutes: lesson.est_minutes,
+                order_index: lesson.order_index,
+              }}
+              trackId={trackId}
+            />
+          )}
+        </div>
       </div>
 
       <section>
@@ -82,17 +102,22 @@ export default async function LessonAdminPage({
                 <th className="px-3 py-2">Title</th>
                 <th className="px-3 py-2">Detail</th>
                 <th className="px-3 py-2">Tags</th>
-                <th className="px-3 py-2"></th>
+                <th className="px-3 py-2 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
+              {rows.map((r, idx) => (
                 <tr key={r.id} className="border-t">
                   <td className="px-3 py-2 font-mono text-xs uppercase">{r.kind}</td>
                   <td className="px-3 py-2">{r.title}</td>
                   <td className="px-3 py-2 text-xs text-slate-500">
                     {r.kind === 'link' && (
-                      <a href={r.url ?? '#'} target="_blank" rel="noopener noreferrer" className="underline">
+                      <a
+                        href={r.url ?? '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="underline"
+                      >
                         {r.url}
                       </a>
                     )}
@@ -104,7 +129,9 @@ export default async function LessonAdminPage({
                     {r.kind === 'video' && (
                       <span>
                         {r.video_asset_id === 'pending' ? (
-                          <span className="text-amber-600">Encoding (waiting on Mux webhook)</span>
+                          <span className="text-amber-600">
+                            Encoding (waiting on Mux webhook)
+                          </span>
                         ) : (
                           <>
                             {r.video_duration_s ?? 0}s · playback {r.video_playback_id}
@@ -116,14 +143,29 @@ export default async function LessonAdminPage({
                   <td className="px-3 py-2">
                     <div className="flex flex-wrap gap-1">
                       {r.exam_codes.map((c) => (
-                        <span key={c} className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px]">
+                        <span
+                          key={c}
+                          className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px]"
+                        >
                           {c}
                         </span>
                       ))}
                     </div>
                   </td>
-                  <td className="px-3 py-2 text-right">
-                    <DeleteResourceButton id={r.id} lessonId={lesson.id} />
+                  <td className="px-3 py-2">
+                    <ResourceRowActions
+                      resource={{
+                        id: r.id,
+                        kind: r.kind,
+                        title: r.title,
+                        url: r.url,
+                        exam_codes: r.exam_codes,
+                        order_index: r.order_index,
+                      }}
+                      lessonId={lesson.id}
+                      isFirst={idx === 0}
+                      isLast={idx === rows.length - 1}
+                    />
                   </td>
                 </tr>
               ))}
@@ -144,10 +186,9 @@ export default async function LessonAdminPage({
           <h2 className="mb-2 text-sm font-medium text-slate-700">AI quiz</h2>
           <div className="rounded-lg border bg-white p-4">
             <p className="mb-3 text-xs text-slate-600">
-              Generate a Meta-style practice quiz from this lesson&apos;s PDF
-              content. The quiz is scoped to this lesson and added to the
-              quizzes table; learners can take it at{' '}
-              <span className="font-mono">/exam/&lt;quizId&gt;</span>.
+              Generate a Meta-style practice quiz from this lesson&apos;s PDF content. The
+              quiz is scoped to this lesson and added to the quizzes table; learners can
+              take it at <span className="font-mono">/exam/&lt;quizId&gt;</span>.
             </p>
             <QuizGenButton
               lessonId={lesson.id}
