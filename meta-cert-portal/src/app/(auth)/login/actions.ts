@@ -43,7 +43,7 @@ export async function sendMagicLinkAction(_prev: ActionResult, formData: FormDat
       emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/auth/callback`,
     },
   });
-  if (error) return { error: 'Could not send link. Try again.' };
+  if (error) return { error: error.message };
   return { ok: true };
 }
 
