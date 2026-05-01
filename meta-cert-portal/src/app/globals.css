@@ -20,6 +20,13 @@
   --color-neutral-hover: #e2e8f0;
   --color-neutral-fg: #1e293b;
 
+  --color-brand: #059669;
+  --color-brand-hover: #047857;
+  --color-brand-soft: #d1fae5;
+  --color-brand-soft-fg: #065f46;
+  --color-brand-fg-on: #ffffff;
+  --color-brand-gradient: linear-gradient(135deg, #047857 0%, #0f766e 50%, #155e75 100%);
+
   --color-focus-ring: #2563eb;
 
   --color-scrim: rgb(15 23 42 / 0.5);
@@ -67,6 +74,13 @@
     --color-neutral-hover: #334155;
     --color-neutral-fg: #e2e8f0;
 
+    --color-brand: #10b981;
+    --color-brand-hover: #34d399;
+    --color-brand-soft: #064e3b;
+    --color-brand-soft-fg: #6ee7b7;
+    --color-brand-fg-on: #052e16;
+    --color-brand-gradient: linear-gradient(135deg, #064e3b 0%, #134e4a 50%, #0e3a4a 100%);
+
     --color-focus-ring: #60a5fa;
 
     --color-scrim: rgb(0 0 0 / 0.7);
@@ -110,6 +124,11 @@
   --color-neutral-bg: var(--color-neutral-bg);
   --color-neutral-hover: var(--color-neutral-hover);
   --color-neutral-fg: var(--color-neutral-fg);
+  --color-brand: var(--color-brand);
+  --color-brand-hover: var(--color-brand-hover);
+  --color-brand-soft: var(--color-brand-soft);
+  --color-brand-soft-fg: var(--color-brand-soft-fg);
+  --color-brand-fg-on: var(--color-brand-fg-on);
   --color-focus-ring: var(--color-focus-ring);
   --color-scrim: var(--color-scrim);
   --color-success: var(--color-success);

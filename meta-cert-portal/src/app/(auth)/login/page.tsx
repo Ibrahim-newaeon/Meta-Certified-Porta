@@ -28,9 +28,12 @@ export default async function LoginPage({
 
       <LoginForm redirectTo={redirect} />
 
-      <p className="mt-6 text-sm text-slate-600">
+      <p className="mt-6 text-sm text-[var(--color-text-muted)]">
         New here?{' '}
-        <Link href="/register" className="font-medium text-emerald-700 hover:underline">
+        <Link
+          href="/register"
+          className="font-medium text-[var(--color-brand-soft-fg)] hover:underline"
+        >
           Create an account
         </Link>
       </p>

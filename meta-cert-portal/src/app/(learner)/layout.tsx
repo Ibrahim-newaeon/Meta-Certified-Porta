@@ -9,22 +9,27 @@ export default async function LearnerLayout({ children }: { children: React.Reac
   const isAdmin = role === 'admin';
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b bg-white">
-        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-6">
+    <div className="min-h-screen bg-[var(--surface-muted)]">
+      <header className="border-b border-[var(--border)] bg-[var(--surface)]">
+        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6">
           <div className="font-semibold">Meta Cert Portal</div>
-          <div className="flex items-center gap-4 text-sm">
+          <div className="flex items-center gap-3 text-sm">
             {isAdmin && (
               <a
                 href="/admin"
-                className="rounded-md bg-amber-100 px-2 py-1 text-xs font-medium text-amber-800 hover:bg-amber-200"
+                className="inline-flex h-9 items-center rounded-md bg-[var(--color-warn-bg)] px-2 text-xs font-medium text-[var(--color-warn-fg)] transition-colors hover:brightness-95"
               >
                 Admin
               </a>
             )}
-            <span className="text-slate-600">{user.email}</span>
+            <span className="hidden text-[var(--color-text-muted)] sm:inline">
+              {user.email}
+            </span>
             <form action={signOutAction}>
-              <button type="submit" className="text-slate-600 hover:text-slate-900">
+              <button
+                type="submit"
+                className="inline-flex h-9 items-center rounded-md px-2 text-[var(--color-text-muted)] transition-colors hover:text-[var(--color-text)]"
+              >
                 Sign out
               </button>
             </form>
@@ -32,7 +37,7 @@ export default async function LearnerLayout({ children }: { children: React.Reac
         </div>
       </header>
       <div className="mx-auto flex max-w-7xl">
-        <aside className="hidden w-56 shrink-0 border-r bg-white md:block">
+        <aside className="hidden w-56 shrink-0 border-r border-[var(--border)] bg-[var(--surface)] md:block">
           <SidebarNav isAdmin={isAdmin} />
         </aside>
         <main className="min-w-0 flex-1">{children}</main>
