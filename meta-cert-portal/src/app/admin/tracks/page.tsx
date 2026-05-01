@@ -18,15 +18,15 @@ export default async function TracksAdminPage() {
       </div>
 
       <section>
-        <h2 className="mb-2 text-sm font-medium text-slate-700">New track</h2>
+        <h2 className="mb-2 text-sm font-medium text-[var(--color-text-muted)]">New track</h2>
         <TrackCreateForm />
       </section>
 
       <section>
-        <h2 className="mb-2 text-sm font-medium text-slate-700">All tracks</h2>
-        <div className="overflow-hidden rounded-lg border bg-white">
+        <h2 className="mb-2 text-sm font-medium text-[var(--color-text-muted)]">All tracks</h2>
+        <div className="overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--surface)]">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
+            <thead className="bg-[var(--surface-muted)] text-left text-xs uppercase text-[var(--color-text-muted)]">
               <tr>
                 <th className="px-3 py-2">Code</th>
                 <th className="px-3 py-2">Title</th>
@@ -38,12 +38,12 @@ export default async function TracksAdminPage() {
             </thead>
             <tbody>
               {(tracks ?? []).map((t) => (
-                <tr key={t.id} className="border-t">
+                <tr key={t.id} className="border-t border-[var(--border)]">
                   <td className="px-3 py-2 font-mono">{t.code}</td>
                   <td className="px-3 py-2">
                     <Link
                       href={`/admin/tracks/${t.id}`}
-                      className="text-slate-900 hover:underline"
+                      className="text-[var(--color-text)] hover:underline"
                     >
                       {t.title}
                     </Link>
@@ -73,7 +73,7 @@ export default async function TracksAdminPage() {
               ))}
               {(!tracks || tracks.length === 0) && (
                 <tr>
-                  <td colSpan={6} className="px-3 py-6 text-center text-slate-500">
+                  <td colSpan={6} className="px-3 py-6 text-center text-[var(--color-text-muted)]">
                     No tracks yet — create one above.
                   </td>
                 </tr>

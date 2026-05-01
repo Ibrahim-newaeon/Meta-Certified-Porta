@@ -22,7 +22,10 @@ export default async function ExamPage({
   if ('error' in startResult) {
     return (
       <div className="mx-auto max-w-3xl p-6">
-        <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        <div
+          role="alert"
+          className="rounded-md border border-[var(--color-danger-border)] bg-[var(--color-danger-bg)] p-4 text-sm text-[var(--color-danger-fg)]"
+        >
           {startResult.error}
         </div>
       </div>
@@ -55,11 +58,11 @@ export default async function ExamPage({
 
   return (
     <div>
-      <div className="border-b bg-white px-6 py-3">
+      <div className="border-b border-[var(--border)] bg-[var(--surface)] px-6 py-3">
         <div className="mx-auto flex max-w-3xl items-center justify-between">
           <div>
             <h1 className="font-semibold">{quiz.title}</h1>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-[var(--color-text-muted)]">
               {quiz.kind === 'mock_exam' ? 'Mock exam' : 'Practice quiz'}
               {quiz.time_limit_s
                 ? ` · ${Math.round(quiz.time_limit_s / 60)} min`

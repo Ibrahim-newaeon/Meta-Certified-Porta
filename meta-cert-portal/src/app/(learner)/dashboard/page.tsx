@@ -37,9 +37,10 @@ export default async function Dashboard() {
       .select('id, est_minutes, modules!inner(track_id)')
       .in('modules.track_id', trackIds);
     for (const row of lessonRows ?? []) {
-      const mod = Array.isArray((row as { modules: unknown }).modules)
-        ? ((row as { modules: { track_id: string }[] }).modules[0] ?? null)
-        : ((row as { modules: { track_id: string } | null }).modules ?? null);
+      const rowModules = (row as { modules: unknown }).modules;
+      const mod = Array.isArray(rowModules)
+        ? ((rowModules[0] ?? null) as { track_id: string } | null)
+        : (rowModules as { track_id: string } | null);
       const tid = mod?.track_id;
       if (!tid) continue;
       lessonsPerTrack[tid] = lessonsPerTrack[tid] || [];

@@ -30,14 +30,14 @@ export default async function QuizzesAdminPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Quizzes</h1>
 
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-[var(--color-text-muted)]">
         Quizzes are generated from a lesson&apos;s PDF on the lesson admin page. Take a
         quiz at <span className="font-mono">/exam/&lt;quizId&gt;</span>.
       </p>
 
-      <div className="overflow-hidden rounded-lg border bg-white">
+      <div className="overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--surface)]">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
+          <thead className="bg-[var(--surface-muted)] text-left text-xs uppercase text-[var(--color-text-muted)]">
             <tr>
               <th className="px-3 py-2">Title</th>
               <th className="px-3 py-2">Lesson</th>
@@ -53,13 +53,13 @@ export default async function QuizzesAdminPage() {
             {quizzes.map((q) => {
               const lesson = Array.isArray(q.lessons) ? q.lessons[0] : q.lessons;
               return (
-                <tr key={q.id} className="border-t">
+                <tr key={q.id} className="border-t border-[var(--border)]">
                   <td className="px-3 py-2">{q.title}</td>
                   <td className="px-3 py-2">
                     {lesson ? (
                       <Link
                         href={`/admin/lessons/${lesson.id}`}
-                        className="text-slate-700 hover:underline"
+                        className="text-[var(--color-text)] hover:underline"
                       >
                         {lesson.title}
                       </Link>
@@ -75,21 +75,21 @@ export default async function QuizzesAdminPage() {
                       {(q.exam_codes ?? []).map((c) => (
                         <span
                           key={c}
-                          className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px]"
+                          className="rounded bg-[var(--color-neutral-bg)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--color-neutral-fg)]"
                         >
                           {c}
                         </span>
                       ))}
                     </div>
                   </td>
-                  <td className="px-3 py-2 text-xs text-slate-500">
+                  <td className="px-3 py-2 text-xs text-[var(--color-text-muted)]">
                     {new Date(q.created_at).toLocaleDateString()}
                   </td>
                   <td className="px-3 py-2">
                     <div className="flex items-center justify-end gap-3">
                       <Link
                         href={`/exam/${q.id}`}
-                        className="text-xs text-slate-600 hover:text-slate-900"
+                        className="text-xs text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
                       >
                         Preview
                       </Link>
@@ -101,7 +101,7 @@ export default async function QuizzesAdminPage() {
             })}
             {quizzes.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-3 py-6 text-center text-slate-500">
+                <td colSpan={8} className="px-3 py-6 text-center text-[var(--color-text-muted)]">
                   No quizzes yet — generate one from a lesson with a PDF resource.
                 </td>
               </tr>

@@ -37,20 +37,20 @@ export default async function TrackDetailPage({
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/admin/tracks" className="text-xs text-slate-500 hover:underline">
+        <Link href="/admin/tracks" className="text-xs text-[var(--color-text-muted)] hover:underline">
           ← Tracks
         </Link>
         <h1 className="mt-1 text-2xl font-semibold">
-          <span className="font-mono text-slate-500">{track.code}</span> · {track.title}
+          <span className="font-mono text-[var(--color-text-muted)]">{track.code}</span> · {track.title}
         </h1>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-[var(--color-text-muted)]">
           Slug: <span className="font-mono">{track.slug}</span> ·{' '}
           {track.is_published ? 'Published' : 'Draft'}
         </p>
       </div>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-medium text-slate-700">Modules</h2>
+        <h2 className="text-sm font-medium text-[var(--color-text-muted)]">Modules</h2>
         <ModuleCreateInline trackId={track.id} />
 
         <div className="space-y-3">
@@ -88,7 +88,7 @@ export default async function TrackDetailPage({
                     />
                   ))}
                   {lessons.length === 0 && (
-                    <p className="px-2 py-1.5 text-xs text-slate-400">No lessons yet.</p>
+                    <p className="px-2 py-1.5 text-xs text-[var(--color-text-subtle)]">No lessons yet.</p>
                   )}
                 </div>
 
@@ -99,7 +99,7 @@ export default async function TrackDetailPage({
             );
           })}
           {moduleList.length === 0 && (
-            <p className="text-sm text-slate-500">No modules yet — add one above.</p>
+            <p className="text-sm text-[var(--color-text-muted)]">No modules yet — add one above.</p>
           )}
         </div>
       </section>

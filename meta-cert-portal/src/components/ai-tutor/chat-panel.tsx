@@ -1,7 +1,34 @@
 'use client';
-import { useRef, useState } from 'react';
+import { memo, useRef, useState } from 'react';
+import { Button } from '@/components/shared/button';
+import { Textarea } from '@/components/shared/input';
+import { readSseStream } from '@/lib/sse';
 
 type Msg = { role: 'user' | 'assistant'; content: string };
+
+const Message = memo(function Message({
+  role,
+  content,
+  placeholder,
+}: {
+  role: Msg['role'];
+  content: string;
+  placeholder: boolean;
+}) {
+  return (
+    <div className={role === 'user' ? 'text-right' : ''}>
+      <span
+        className={`inline-block max-w-[85%] whitespace-pre-wrap rounded-lg px-3 py-2 ${
+          role === 'user'
+            ? 'bg-[var(--color-primary)] text-[var(--color-primary-fg)]'
+            : 'bg-[var(--surface-muted)] text-[var(--color-text)]'
+        }`}
+      >
+        {content || (placeholder ? '…' : '')}
+      </span>
+    </div>
+  );
+});
 
 export function ChatPanel({ lessonId }: { lessonId?: string }) {
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -39,95 +66,77 @@ export function ChatPanel({ lessonId }: { lessonId?: string }) {
       return;
     }
 
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-
-      // Split on the SSE event delimiter; keep any trailing partial event.
-      const blocks = buffer.split('\n\n');
-      buffer = blocks.pop() ?? '';
-
-      for (const block of blocks) {
-        if (!block.trim()) continue;
-        const lines = block.split('\n');
-        const evtLine = lines.find((l) => l.startsWith('event: '));
-        const dataLine = lines.find((l) => l.startsWith('data: '));
-        if (!evtLine || !dataLine) continue;
-
-        const evt = evtLine.slice('event: '.length);
-        let data: { sessionId?: string; text?: string; message?: string };
+    try {
+      for await (const { event, data } of readSseStream(res.body)) {
+        let parsed: { sessionId?: string; text?: string; message?: string };
         try {
-          data = JSON.parse(dataLine.slice('data: '.length));
+          parsed = JSON.parse(data);
         } catch {
           continue;
         }
 
-        if (evt === 'session' && data.sessionId) {
-          sessionIdRef.current = data.sessionId;
-        } else if (evt === 'delta' && data.text) {
+        if (event === 'session' && parsed.sessionId) {
+          sessionIdRef.current = parsed.sessionId;
+        } else if (event === 'delta' && parsed.text) {
+          const chunk = parsed.text;
           setMessages((m) => {
-            const copy = [...m];
+            const copy = m.slice();
             const last = copy[copy.length - 1];
             copy[copy.length - 1] = {
               role: 'assistant',
-              content: last.content + data.text,
+              content: last.content + chunk,
             };
             return copy;
           });
-        } else if (evt === 'error') {
-          setError(data.message ?? 'Stream error');
-          setStreaming(false);
-        } else if (evt === 'done') {
-          setStreaming(false);
+        } else if (event === 'error') {
+          setError(parsed.message ?? 'Stream error');
+        } else if (event === 'done') {
+          break;
         }
       }
+    } finally {
+      setStreaming(false);
     }
-    setStreaming(false);
   }
 
   return (
-    <div className="flex h-[600px] flex-col rounded-lg border bg-white">
-      <div className="border-b px-4 py-2 text-sm">
+    <div className="flex h-full min-h-[400px] flex-col rounded-lg border border-[var(--border)] bg-[var(--surface)]">
+      <div className="border-b border-[var(--border)] px-4 py-2 text-sm">
         <span className="font-medium">AI Tutor</span>
-        <span className="ml-2 text-xs text-slate-500">
+        <span className="ml-2 text-xs text-[var(--color-text-subtle)]">
           Meta Blueprint coach · {lessonId ? 'lesson context loaded' : 'general'}
         </span>
       </div>
 
-      <div className="flex-1 space-y-3 overflow-y-auto p-4 text-sm">
+      <div className="flex-1 space-y-3 overflow-y-auto p-4 text-sm" aria-live="polite">
         {messages.length === 0 && (
-          <p className="text-center text-slate-500">
+          <p className="text-center text-[var(--color-text-muted)]">
             Ask about Advantage+, CAPI, attribution windows, auction dynamics…
           </p>
         )}
         {messages.map((m, i) => (
-          <div key={i} className={m.role === 'user' ? 'text-right' : ''}>
-            <span
-              className={`inline-block max-w-[85%] whitespace-pre-wrap rounded-lg px-3 py-2 ${
-                m.role === 'user'
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-slate-100 text-slate-900'
-              }`}
-            >
-              {m.content || (streaming && i === messages.length - 1 ? '…' : '')}
-            </span>
-          </div>
+          <Message
+            key={i}
+            role={m.role}
+            content={m.content}
+            placeholder={streaming && i === messages.length - 1}
+          />
         ))}
-        {error && <p className="text-xs text-red-600">{error}</p>}
+        {error && (
+          <p role="alert" className="text-xs text-rose-700 dark:text-rose-300">
+            {error}
+          </p>
+        )}
       </div>
 
-      <div className="flex gap-2 border-t p-3">
-        <textarea
+      <div className="flex gap-2 border-t border-[var(--border)] p-3">
+        <Textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}
           rows={2}
           placeholder="Ask the tutor…"
-          className="flex-1 rounded-md border border-slate-300 px-3 py-1.5 text-sm focus:border-slate-500 focus:outline-none"
+          aria-label="Message the AI tutor"
+          className="flex-1"
           onKeyDown={(e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
@@ -135,13 +144,13 @@ export function ChatPanel({ lessonId }: { lessonId?: string }) {
             }
           }}
         />
-        <button
+        <Button
           onClick={send}
           disabled={streaming || !input.trim()}
-          className="inline-flex h-9 items-center self-end rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+          className="self-end"
         >
-          Send
-        </button>
+          {streaming ? 'Sending…' : 'Send'}
+        </Button>
       </div>
     </div>
   );

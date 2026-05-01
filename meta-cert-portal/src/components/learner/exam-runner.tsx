@@ -1,7 +1,8 @@
 'use client';
-import { useEffect, useMemo, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { submitAttemptAction } from '@/app/(learner)/exam/[quizId]/actions';
+import { Button } from '@/components/shared/button';
 
 export type ExamQuestion = {
   id: string;
@@ -77,7 +78,7 @@ export function ExamRunner({
 
   if (!q) {
     return (
-      <div className="rounded-lg border bg-white p-6 text-sm text-slate-600">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-6 text-sm text-[var(--color-text-muted)]">
         This quiz has no questions yet. Ask an admin to generate or add some.
       </div>
     );
@@ -88,23 +89,17 @@ export function ExamRunner({
   return (
     <div className="mx-auto max-w-3xl space-y-4 p-6">
       <div className="flex items-center justify-between">
-        <span className="text-sm text-slate-600">
+        <span className="text-sm text-[var(--color-text-muted)]" aria-live="polite">
           Question {idx + 1} of {questions.length}
         </span>
         {remaining != null && (
-          <span
-            className={`font-mono text-sm ${
-              remaining < 60 ? 'font-bold text-red-600' : 'text-slate-700'
-            }`}
-          >
-            {Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, '0')}
-          </span>
+          <Timer remaining={remaining} />
         )}
       </div>
 
-      <div className="rounded-lg border bg-white p-6">
+      <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-6">
         {q.scenario && (
-          <div className="mb-4 rounded-md bg-slate-50 p-3 text-sm text-slate-700">
+          <div className="mb-4 rounded-md bg-[var(--surface-muted)] p-3 text-sm text-[var(--color-text-muted)]">
             {q.scenario}
           </div>
         )}
@@ -117,7 +112,9 @@ export function ExamRunner({
               <label
                 key={o.id}
                 className={`flex cursor-pointer items-start gap-3 rounded-md border p-3 transition ${
-                  checked ? 'border-slate-900 bg-slate-50' : 'border-slate-200 hover:border-slate-400'
+                  checked
+                    ? 'border-[var(--color-text)] bg-[var(--surface-muted)]'
+                    : 'border-[var(--border)] hover:border-[var(--border-strong)]'
                 }`}
               >
                 <input
@@ -145,33 +142,48 @@ export function ExamRunner({
         </div>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">
+          {error}
+        </p>
+      )}
 
-      <div className="flex justify-between">
-        <button
+      <div className="flex justify-between gap-2">
+        <Button
+          variant="secondary"
           onClick={() => setIdx((i) => Math.max(0, i - 1))}
           disabled={idx === 0}
-          className="inline-flex h-9 items-center rounded-md border border-slate-300 bg-white px-4 text-sm hover:bg-slate-50 disabled:opacity-50"
         >
-          ← Back
-        </button>
+          <span aria-hidden="true">← </span>Back
+        </Button>
         {idx < questions.length - 1 ? (
-          <button
-            onClick={() => setIdx((i) => i + 1)}
-            className="inline-flex h-9 items-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800"
-          >
-            Next →
-          </button>
+          <Button onClick={() => setIdx((i) => i + 1)}>
+            Next<span aria-hidden="true"> →</span>
+          </Button>
         ) : (
-          <button
-            onClick={handleSubmit}
-            disabled={submitting}
-            className="inline-flex h-9 items-center rounded-md bg-emerald-700 px-4 text-sm font-medium text-white hover:bg-emerald-800 disabled:opacity-50"
-          >
-            {submitting ? 'Submitting…' : 'Submit exam'}
-          </button>
+          <Button variant="success" onClick={handleSubmit} disabled={submitting}>
+            {submitting ? 'Submitting answers…' : 'Submit exam'}
+          </Button>
         )}
       </div>
     </div>
   );
 }
+
+const Timer = memo(function Timer({ remaining }: { remaining: number }) {
+  const low = remaining < 60;
+  return (
+    <span
+      role="timer"
+      aria-live={low ? 'assertive' : 'off'}
+      aria-label={`Time remaining: ${Math.floor(remaining / 60)} minutes ${remaining % 60} seconds`}
+      className={`font-mono text-sm ${
+        low ? 'font-bold text-rose-700 dark:text-rose-300' : 'text-[var(--color-text-muted)]'
+      }`}
+    >
+      <span aria-hidden="true">
+        {Math.floor(remaining / 60)}:{String(remaining % 60).padStart(2, '0')}
+      </span>
+    </span>
+  );
+});

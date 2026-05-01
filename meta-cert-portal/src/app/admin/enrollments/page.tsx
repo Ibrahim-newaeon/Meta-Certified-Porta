@@ -1,5 +1,6 @@
 import { requireRole } from '@/lib/auth/roles';
 import { UnenrollButton } from '@/components/admin/unenroll-button';
+import { Badge } from '@/components/shared/badge';
 
 type Enrollment = {
   user_id: string;
@@ -26,9 +27,9 @@ export default async function EnrollmentsAdminPage() {
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold">Enrollments</h1>
 
-      <div className="overflow-hidden rounded-lg border bg-white">
+      <div className="overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--surface)]">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
+          <thead className="bg-[var(--surface-muted)] text-left text-xs uppercase text-[var(--color-text-muted)]">
             <tr>
               <th className="px-3 py-2">Learner</th>
               <th className="px-3 py-2">Track</th>
@@ -45,29 +46,25 @@ export default async function EnrollmentsAdminPage() {
                 : e.certification_tracks;
               if (!p || !t) return null;
               return (
-                <tr key={`${e.user_id}-${e.track_id}`} className="border-t">
+                <tr key={`${e.user_id}-${e.track_id}`} className="border-t border-[var(--border)]">
                   <td className="px-3 py-2">
                     <div>{p.email}</div>
                     {p.full_name && (
-                      <div className="text-xs text-slate-500">{p.full_name}</div>
+                      <div className="text-xs text-[var(--color-text-muted)]">{p.full_name}</div>
                     )}
                   </td>
                   <td className="px-3 py-2">
-                    <span className="font-mono text-xs text-slate-500">{t.code}</span>{' '}
+                    <span className="font-mono text-xs text-[var(--color-text-muted)]">{t.code}</span>{' '}
                     {t.title}
                   </td>
-                  <td className="px-3 py-2 text-xs text-slate-500">
+                  <td className="px-3 py-2 text-xs text-[var(--color-text-muted)]">
                     {new Date(e.enrolled_at).toLocaleDateString()}
                   </td>
                   <td className="px-3 py-2">
                     {e.completed_at ? (
-                      <span className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-medium text-green-800">
-                        Completed
-                      </span>
+                      <Badge variant="success">Completed</Badge>
                     ) : (
-                      <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-700">
-                        In progress
-                      </span>
+                      <Badge variant="neutral">In progress</Badge>
                     )}
                   </td>
                   <td className="px-3 py-2 text-right">
@@ -83,7 +80,7 @@ export default async function EnrollmentsAdminPage() {
             })}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-3 py-6 text-center text-slate-500">
+                <td colSpan={5} className="px-3 py-6 text-center text-[var(--color-text-muted)]">
                   No enrollments yet.
                 </td>
               </tr>

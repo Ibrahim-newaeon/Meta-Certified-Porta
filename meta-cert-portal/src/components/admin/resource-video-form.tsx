@@ -1,12 +1,16 @@
 'use client';
-import { useState, useTransition } from 'react';
+import { useId, useState, useTransition } from 'react';
 import { createMuxUploadAction } from '@/app/admin/resources/actions';
+import { Button } from '@/components/shared/button';
+import { Input, FieldLabel } from '@/components/shared/input';
 
 export function ResourceVideoForm({ lessonId }: { lessonId: string }) {
   const [pending, start] = useTransition();
   const [pct, setPct] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [ok, setOk] = useState<string | null>(null);
+  const titleId = useId();
+  const fileId = useId();
 
   async function onSubmit(fd: FormData) {
     setError(null);
@@ -24,7 +28,6 @@ export function ResourceVideoForm({ lessonId }: { lessonId: string }) {
 
     setPct(10);
 
-    // PUT the video to Mux's signed upload URL.
     const xhr = new XMLHttpRequest();
     xhr.open('PUT', res.uploadUrl);
     xhr.upload.onprogress = (ev) => {
@@ -36,7 +39,7 @@ export function ResourceVideoForm({ lessonId }: { lessonId: string }) {
       if (xhr.status >= 200 && xhr.status < 300) {
         setPct(100);
         setOk(
-          'Uploaded to Mux. Once Mux finishes encoding, the webhook will populate the playback id and the resource will become viewable.'
+          'Uploaded to Mux. Once Mux finishes encoding, the webhook will populate the playback id and the resource will become viewable.',
         );
         setTimeout(() => window.location.reload(), 1500);
       } else {
@@ -47,46 +50,57 @@ export function ResourceVideoForm({ lessonId }: { lessonId: string }) {
     xhr.send(file);
   }
 
+  const pendingLabel =
+    pct === 0 ? 'Preparing…' : pct < 100 ? `Uploading… ${pct}%` : 'Finalising…';
+
   return (
     <form
       action={(fd) => start(() => onSubmit(fd))}
-      className="space-y-3 rounded-lg border bg-white p-4"
+      className="space-y-3 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4"
     >
       <div>
-        <label className="text-xs font-medium text-slate-600">Title</label>
-        <input
-          name="title"
-          required
-          className="mt-1 block h-9 w-full rounded-md border border-slate-300 px-2 text-sm"
-        />
+        <FieldLabel htmlFor={titleId}>Title</FieldLabel>
+        <Input id={titleId} name="title" required className="mt-1" />
       </div>
       <div>
-        <label className="text-xs font-medium text-slate-600">Video file</label>
+        <FieldLabel htmlFor={fileId}>Video file</FieldLabel>
         <input
+          id={fileId}
           name="file"
           type="file"
           accept="video/*"
           required
-          className="mt-1 block w-full text-sm"
+          className="mt-1 block w-full text-sm file:mr-3 file:h-10 file:rounded-md file:border-0 file:bg-[var(--color-primary)] file:px-3 file:text-xs file:font-medium file:text-[var(--color-primary-fg)] hover:file:bg-[var(--color-primary-hover)]"
         />
       </div>
       {pct > 0 && (
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-200">
+        <div
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={pct}
+          aria-label="Upload progress"
+          className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--surface-muted)]"
+        >
           <div
-            className="h-full bg-slate-900 transition-all"
-            style={{ width: `${pct}%` }}
+            className="h-full origin-left bg-[var(--color-primary)] transition-transform duration-200"
+            style={{ transform: `scaleX(${pct / 100})` }}
           />
         </div>
       )}
-      {error && <p className="text-sm text-red-600">{error}</p>}
-      {ok && <p className="text-sm text-green-600">{ok}</p>}
-      <button
-        type="submit"
-        disabled={pending}
-        className="inline-flex h-9 items-center rounded-md bg-slate-900 px-4 text-sm font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-      >
-        {pending ? 'Uploading…' : 'Upload video'}
-      </button>
+      {error && (
+        <p role="alert" className="text-sm text-rose-700 dark:text-rose-300">
+          {error}
+        </p>
+      )}
+      {ok && (
+        <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">
+          {ok}
+        </p>
+      )}
+      <Button type="submit" disabled={pending}>
+        {pending ? pendingLabel : 'Upload video'}
+      </Button>
     </form>
   );
 }

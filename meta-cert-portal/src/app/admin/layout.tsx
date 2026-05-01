@@ -16,31 +16,37 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const { profile } = await requireRole('admin');
 
   return (
-    <div className="grid min-h-screen grid-cols-[220px_1fr] bg-slate-50">
-      <aside className="border-r bg-white">
-        <div className="border-b px-4 py-4 text-sm font-semibold">Meta Cert Admin</div>
-        <nav className="flex flex-col p-2 text-sm">
+    <div className="flex min-h-screen flex-col bg-[var(--surface-muted)] md:grid md:grid-cols-[220px_1fr]">
+      <aside className="flex shrink-0 flex-col border-b border-[var(--border)] bg-[var(--surface)] md:sticky md:top-0 md:h-screen md:border-b-0 md:border-r">
+        <div className="border-b border-[var(--border)] px-4 py-4 text-sm font-semibold">Meta Cert Admin</div>
+        <nav
+          aria-label="Admin"
+          className="flex flex-row gap-1 overflow-x-auto p-2 text-sm md:flex-col md:gap-0 md:overflow-visible"
+        >
           {NAV.map((n) => (
             <Link
               key={n.href}
               href={n.href}
-              className="rounded-md px-3 py-2 text-slate-700 hover:bg-slate-100"
+              className="inline-flex h-11 shrink-0 items-center rounded-md px-3 text-[var(--color-text-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--color-text)] md:h-auto md:py-2"
             >
               {n.label}
             </Link>
           ))}
         </nav>
-        <div className="absolute bottom-0 w-[220px] border-t bg-white p-3 text-xs text-slate-500">
+        <div className="mt-auto hidden border-t border-[var(--border)] bg-[var(--surface)] p-3 text-xs text-[var(--color-text-muted)] md:block">
           <div className="mb-1 truncate">{profile.email}</div>
           <form action={signOutAction}>
-            <button type="submit" className="text-slate-600 hover:text-slate-900">
+            <button
+              type="submit"
+              className="inline-flex h-9 items-center rounded-md text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+            >
               Sign out
             </button>
           </form>
         </div>
       </aside>
 
-      <main className="p-6">{children}</main>
+      <main className="p-4 md:p-6">{children}</main>
     </div>
   );
 }

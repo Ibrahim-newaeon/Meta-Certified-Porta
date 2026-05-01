@@ -1,5 +1,5 @@
 'use client';
-import { useActionState, useState, useTransition } from 'react';
+import { useActionState, useId, useState, useTransition } from 'react';
 import { useFormStatus } from 'react-dom';
 import {
   createModuleAction,
@@ -13,45 +13,57 @@ import {
   deleteLessonAction,
   reorderLessonAction,
 } from '@/app/admin/lessons/actions';
+import { ConfirmButton } from '@/components/shared/confirm-button';
+import { Button } from '@/components/shared/button';
 
-function MiniSubmit({ label }: { label: string }) {
+const INPUT_SM =
+  'mt-1 block h-10 w-full rounded-md border border-[var(--border-strong)] bg-[var(--surface)] px-2 text-sm text-[var(--color-text)] focus:border-[var(--color-focus-ring)] focus:ring-2 focus:ring-[var(--color-focus-ring)]/20 focus:outline-none';
+const LABEL = 'block text-xs font-medium text-[var(--color-text-muted)]';
+
+function MiniSubmit({ label, pendingLabel }: { label: string; pendingLabel?: string }) {
   const { pending } = useFormStatus();
   return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="inline-flex h-8 items-center rounded-md bg-slate-900 px-3 text-xs font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-    >
-      {pending ? '…' : label}
-    </button>
+    <Button type="submit" size="sm" disabled={pending}>
+      {pending ? (pendingLabel ?? `${label}…`) : label}
+    </Button>
   );
 }
 
 // ---------- MODULE: create ----------
 export function ModuleCreateInline({ trackId }: { trackId: string }) {
   const [state, action] = useActionState(createModuleAction, null);
+  const titleId = useId();
+  const orderId = useId();
   return (
-    <form action={action} className="flex items-end gap-2 rounded-md border bg-slate-50 p-2">
+    <form
+      action={action}
+      className="flex flex-wrap items-end gap-2 rounded-md border border-[var(--border)] bg-[var(--surface-muted)] p-2"
+    >
       <input type="hidden" name="trackId" value={trackId} />
-      <div className="flex-1">
-        <label className="text-xs text-slate-600">New module title</label>
-        <input
-          name="title"
-          required
-          className="mt-1 block h-8 w-full rounded-md border border-slate-300 px-2 text-sm"
-        />
+      <div className="min-w-0 flex-1">
+        <label htmlFor={titleId} className={LABEL}>
+          New module title
+        </label>
+        <input id={titleId} name="title" required className={INPUT_SM} />
       </div>
-      <div className="w-20">
-        <label className="text-xs text-slate-600">Order</label>
+      <div className="w-20 shrink-0">
+        <label htmlFor={orderId} className={LABEL}>
+          Order
+        </label>
         <input
+          id={orderId}
           name="orderIndex"
           type="number"
           defaultValue={0}
-          className="mt-1 block h-8 w-full rounded-md border border-slate-300 px-2 text-sm"
+          className={INPUT_SM}
         />
       </div>
-      <MiniSubmit label="Add module" />
-      {state?.error && <p className="self-center text-xs text-red-600">{state.error}</p>}
+      <MiniSubmit label="Add module" pendingLabel="Adding…" />
+      {state?.error && (
+        <p role="alert" className="w-full text-xs text-rose-700 dark:text-rose-300">
+          {state.error}
+        </p>
+      )}
     </form>
   );
 }
@@ -68,6 +80,8 @@ export function ModuleEditInline({
 }) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const titleId = useId();
+  const orderId = useId();
   return (
     <form
       action={(fd) => {
@@ -78,43 +92,45 @@ export function ModuleEditInline({
           else onDone();
         });
       }}
-      className="flex flex-wrap items-end gap-2 rounded-md border border-slate-300 bg-slate-50 p-2"
+      className="flex flex-wrap items-end gap-2 rounded-md border border-[var(--border)] bg-[var(--surface-muted)] p-2"
     >
       <input type="hidden" name="id" value={m.id} />
       <input type="hidden" name="trackId" value={trackId} />
-      <div className="flex-1 min-w-[240px]">
-        <label className="text-xs text-slate-600">Title</label>
+      <div className="min-w-0 flex-1 sm:min-w-[240px]">
+        <label htmlFor={titleId} className={LABEL}>
+          Title
+        </label>
         <input
+          id={titleId}
           name="title"
           defaultValue={m.title}
           required
-          className="mt-1 block h-8 w-full rounded-md border border-slate-300 px-2 text-sm"
+          className={INPUT_SM}
         />
       </div>
-      <div className="w-20">
-        <label className="text-xs text-slate-600">Order</label>
+      <div className="w-20 shrink-0">
+        <label htmlFor={orderId} className={LABEL}>
+          Order
+        </label>
         <input
+          id={orderId}
           name="orderIndex"
           type="number"
           defaultValue={m.order_index}
-          className="mt-1 block h-8 w-full rounded-md border border-slate-300 px-2 text-sm"
+          className={INPUT_SM}
         />
       </div>
-      <button
-        type="submit"
-        disabled={pending}
-        className="inline-flex h-8 items-center rounded-md bg-slate-900 px-3 text-xs font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-      >
-        {pending ? '…' : 'Save'}
-      </button>
-      <button
-        type="button"
-        onClick={onDone}
-        className="inline-flex h-8 items-center rounded-md border border-slate-300 px-3 text-xs hover:bg-white"
-      >
+      <Button type="submit" size="sm" disabled={pending}>
+        {pending ? 'Saving…' : 'Save'}
+      </Button>
+      <Button type="button" variant="secondary" size="sm" onClick={onDone} disabled={pending}>
         Cancel
-      </button>
-      {error && <p className="w-full text-xs text-red-600">{error}</p>}
+      </Button>
+      {error && (
+        <p role="alert" className="w-full text-xs text-rose-700 dark:text-rose-300">
+          {error}
+        </p>
+      )}
     </form>
   );
 }
@@ -126,7 +142,7 @@ export function ModuleRowActions({
   isLast,
   onEdit,
 }: {
-  module: { id: string };
+  module: { id: string; title: string };
   trackId: string;
   isFirst: boolean;
   isLast: boolean;
@@ -134,33 +150,29 @@ export function ModuleRowActions({
 }) {
   const [pending, start] = useTransition();
   return (
-    <div className="flex items-center gap-2">
-      <button
-        type="button"
+    <div className="flex items-center gap-1">
+      <Button
+        variant="ghost"
+        size="iconSm"
+        aria-label={`Move module "${m.title}" up`}
         disabled={isFirst || pending}
         onClick={() => start(() => reorderModuleAction(m.id, trackId, 'up').then(() => {}))}
-        className="text-xs text-slate-600 hover:text-slate-900 disabled:opacity-30"
-        title="Move up"
       >
-        ↑
-      </button>
-      <button
-        type="button"
+        <span aria-hidden="true">↑</span>
+      </Button>
+      <Button
+        variant="ghost"
+        size="iconSm"
+        aria-label={`Move module "${m.title}" down`}
         disabled={isLast || pending}
         onClick={() => start(() => reorderModuleAction(m.id, trackId, 'down').then(() => {}))}
-        className="text-xs text-slate-600 hover:text-slate-900 disabled:opacity-30"
-        title="Move down"
       >
-        ↓
-      </button>
-      <button
-        type="button"
-        onClick={onEdit}
-        className="text-xs text-slate-600 hover:text-slate-900"
-      >
+        <span aria-hidden="true">↓</span>
+      </Button>
+      <Button variant="secondary" size="sm" onClick={onEdit}>
         Edit
-      </button>
-      <DeleteModuleButton id={m.id} trackId={trackId} />
+      </Button>
+      <DeleteModuleButton id={m.id} trackId={trackId} title={m.title} />
     </div>
   );
 }
@@ -168,37 +180,51 @@ export function ModuleRowActions({
 // ---------- LESSON: create ----------
 export function LessonCreateInline({ moduleId }: { moduleId: string }) {
   const [state, action] = useActionState(createLessonAction, null);
+  const titleId = useId();
+  const orderId = useId();
+  const estId = useId();
   return (
-    <form action={action} className="flex items-end gap-2 rounded-md bg-white p-2">
+    <form
+      action={action}
+      className="flex flex-wrap items-end gap-2 rounded-md bg-[var(--surface)] p-2"
+    >
       <input type="hidden" name="moduleId" value={moduleId} />
-      <div className="flex-1">
-        <label className="text-xs text-slate-600">New lesson title</label>
-        <input
-          name="title"
-          required
-          className="mt-1 block h-8 w-full rounded-md border border-slate-300 px-2 text-sm"
-        />
+      <div className="min-w-0 flex-1">
+        <label htmlFor={titleId} className={LABEL}>
+          New lesson title
+        </label>
+        <input id={titleId} name="title" required className={INPUT_SM} />
       </div>
-      <div className="w-20">
-        <label className="text-xs text-slate-600">Order</label>
+      <div className="w-20 shrink-0">
+        <label htmlFor={orderId} className={LABEL}>
+          Order
+        </label>
         <input
+          id={orderId}
           name="orderIndex"
           type="number"
           defaultValue={0}
-          className="mt-1 block h-8 w-full rounded-md border border-slate-300 px-2 text-sm"
+          className={INPUT_SM}
         />
       </div>
-      <div className="w-20">
-        <label className="text-xs text-slate-600">Est min</label>
+      <div className="w-20 shrink-0">
+        <label htmlFor={estId} className={LABEL}>
+          Est min
+        </label>
         <input
+          id={estId}
           name="estMinutes"
           type="number"
           defaultValue={10}
-          className="mt-1 block h-8 w-full rounded-md border border-slate-300 px-2 text-sm"
+          className={INPUT_SM}
         />
       </div>
-      <MiniSubmit label="Add lesson" />
-      {state?.error && <p className="self-center text-xs text-red-600">{state.error}</p>}
+      <MiniSubmit label="Add lesson" pendingLabel="Adding…" />
+      {state?.error && (
+        <p role="alert" className="w-full text-xs text-rose-700 dark:text-rose-300">
+          {state.error}
+        </p>
+      )}
     </form>
   );
 }
@@ -221,6 +247,10 @@ export function LessonEditInline({
 }) {
   const [pending, start] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const titleId = useId();
+  const orderId = useId();
+  const estId = useId();
+  const summaryId = useId();
   return (
     <form
       action={(fd) => {
@@ -231,61 +261,69 @@ export function LessonEditInline({
           else onDone();
         });
       }}
-      className="flex flex-wrap items-end gap-2 rounded-md border border-slate-300 bg-slate-50 p-2"
+      className="flex flex-wrap items-end gap-2 rounded-md border border-[var(--border)] bg-[var(--surface-muted)] p-2"
     >
       <input type="hidden" name="id" value={lesson.id} />
       <input type="hidden" name="trackId" value={trackId} />
-      <div className="flex-1 min-w-[240px]">
-        <label className="text-xs text-slate-600">Title</label>
+      <div className="min-w-0 flex-1 sm:min-w-[240px]">
+        <label htmlFor={titleId} className={LABEL}>
+          Title
+        </label>
         <input
+          id={titleId}
           name="title"
           defaultValue={lesson.title}
           required
-          className="mt-1 block h-8 w-full rounded-md border border-slate-300 px-2 text-sm"
+          className={INPUT_SM}
         />
       </div>
-      <div className="w-20">
-        <label className="text-xs text-slate-600">Order</label>
+      <div className="w-20 shrink-0">
+        <label htmlFor={orderId} className={LABEL}>
+          Order
+        </label>
         <input
+          id={orderId}
           name="orderIndex"
           type="number"
           defaultValue={lesson.order_index}
-          className="mt-1 block h-8 w-full rounded-md border border-slate-300 px-2 text-sm"
+          className={INPUT_SM}
         />
       </div>
-      <div className="w-20">
-        <label className="text-xs text-slate-600">Est min</label>
+      <div className="w-20 shrink-0">
+        <label htmlFor={estId} className={LABEL}>
+          Est min
+        </label>
         <input
+          id={estId}
           name="estMinutes"
           type="number"
           defaultValue={lesson.est_minutes ?? 10}
-          className="mt-1 block h-8 w-full rounded-md border border-slate-300 px-2 text-sm"
+          className={INPUT_SM}
         />
       </div>
       <div className="w-full">
-        <label className="text-xs text-slate-600">Summary</label>
+        <label htmlFor={summaryId} className={LABEL}>
+          Summary
+        </label>
         <textarea
+          id={summaryId}
           name="summary"
           defaultValue={lesson.summary ?? ''}
           rows={2}
-          className="mt-1 block w-full rounded-md border border-slate-300 px-2 py-1 text-sm"
+          className="mt-1 block w-full rounded-md border border-[var(--border-strong)] bg-[var(--surface)] px-2 py-1.5 text-sm text-[var(--color-text)] focus:border-[var(--color-focus-ring)] focus:ring-2 focus:ring-[var(--color-focus-ring)]/20 focus:outline-none"
         />
       </div>
-      <button
-        type="submit"
-        disabled={pending}
-        className="inline-flex h-8 items-center rounded-md bg-slate-900 px-3 text-xs font-medium text-white hover:bg-slate-800 disabled:opacity-50"
-      >
-        {pending ? '…' : 'Save'}
-      </button>
-      <button
-        type="button"
-        onClick={onDone}
-        className="inline-flex h-8 items-center rounded-md border border-slate-300 px-3 text-xs hover:bg-white"
-      >
+      <Button type="submit" size="sm" disabled={pending}>
+        {pending ? 'Saving…' : 'Save'}
+      </Button>
+      <Button type="button" variant="secondary" size="sm" onClick={onDone} disabled={pending}>
         Cancel
-      </button>
-      {error && <p className="w-full text-xs text-red-600">{error}</p>}
+      </Button>
+      {error && (
+        <p role="alert" className="w-full text-xs text-rose-700 dark:text-rose-300">
+          {error}
+        </p>
+      )}
     </form>
   );
 }
@@ -298,7 +336,7 @@ export function LessonRowActions({
   isLast,
   onEdit,
 }: {
-  lesson: { id: string };
+  lesson: { id: string; title: string };
   moduleId: string;
   trackId: string;
   isFirst: boolean;
@@ -307,71 +345,83 @@ export function LessonRowActions({
 }) {
   const [pending, start] = useTransition();
   return (
-    <div className="flex items-center gap-2">
-      <button
-        type="button"
+    <div className="flex items-center gap-1">
+      <Button
+        variant="ghost"
+        size="iconSm"
+        aria-label={`Move lesson "${lesson.title}" up`}
         disabled={isFirst || pending}
         onClick={() =>
           start(() => reorderLessonAction(lesson.id, moduleId, trackId, 'up').then(() => {}))
         }
-        className="text-xs text-slate-600 hover:text-slate-900 disabled:opacity-30"
-        title="Move up"
       >
-        ↑
-      </button>
-      <button
-        type="button"
+        <span aria-hidden="true">↑</span>
+      </Button>
+      <Button
+        variant="ghost"
+        size="iconSm"
+        aria-label={`Move lesson "${lesson.title}" down`}
         disabled={isLast || pending}
         onClick={() =>
           start(() => reorderLessonAction(lesson.id, moduleId, trackId, 'down').then(() => {}))
         }
-        className="text-xs text-slate-600 hover:text-slate-900 disabled:opacity-30"
-        title="Move down"
       >
-        ↓
-      </button>
-      <button
-        type="button"
-        onClick={onEdit}
-        className="text-xs text-slate-600 hover:text-slate-900"
-      >
+        <span aria-hidden="true">↓</span>
+      </Button>
+      <Button variant="secondary" size="sm" onClick={onEdit}>
         Edit
-      </button>
-      <DeleteLessonButton id={lesson.id} trackId={trackId} />
+      </Button>
+      <DeleteLessonButton id={lesson.id} trackId={trackId} title={lesson.title} />
     </div>
   );
 }
 
 // ---------- DELETE ----------
-export function DeleteModuleButton({ id, trackId }: { id: string; trackId: string }) {
-  const [pending, start] = useTransition();
+export function DeleteModuleButton({
+  id,
+  trackId,
+  title,
+}: {
+  id: string;
+  trackId: string;
+  title?: string;
+}) {
   return (
-    <button
-      onClick={() => {
-        if (!confirm('Delete module and all its lessons + resources?')) return;
-        start(() => deleteModuleAction(id, trackId).then(() => {}));
+    <ConfirmButton
+      label="Delete"
+      title={title ? `Delete module "${title}"?` : 'Delete module?'}
+      description="All lessons and resources in this module will be removed. This cannot be undone."
+      confirmLabel="Delete module"
+      variant="danger"
+      triggerSize="sm"
+      onConfirm={async () => {
+        await deleteModuleAction(id, trackId);
       }}
-      disabled={pending}
-      className="text-xs text-red-600 hover:text-red-800 disabled:opacity-50"
-    >
-      Delete
-    </button>
+    />
   );
 }
 
-export function DeleteLessonButton({ id, trackId }: { id: string; trackId: string }) {
-  const [pending, start] = useTransition();
+export function DeleteLessonButton({
+  id,
+  trackId,
+  title,
+}: {
+  id: string;
+  trackId: string;
+  title?: string;
+}) {
   return (
-    <button
-      onClick={() => {
-        if (!confirm('Delete this lesson and its resources?')) return;
-        start(() => deleteLessonAction(id, trackId).then(() => {}));
+    <ConfirmButton
+      label="Delete"
+      title={title ? `Delete lesson "${title}"?` : 'Delete lesson?'}
+      description="All resources for this lesson will be removed. This cannot be undone."
+      confirmLabel="Delete lesson"
+      variant="danger"
+      triggerSize="sm"
+      onConfirm={async () => {
+        await deleteLessonAction(id, trackId);
       }}
-      disabled={pending}
-      className="text-xs text-red-600 hover:text-red-800 disabled:opacity-50"
-    >
-      Delete
-    </button>
+    />
   );
 }
 
@@ -391,13 +441,13 @@ export function ModuleRow({
 }) {
   const [editing, setEditing] = useState(false);
   return (
-    <div className="rounded-lg border bg-white p-3">
+    <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-3">
       {editing ? (
         <ModuleEditInline module={m} trackId={trackId} onDone={() => setEditing(false)} />
       ) : (
         <div className="flex items-center justify-between">
           <div>
-            <span className="text-xs text-slate-400">#{m.order_index}</span>{' '}
+            <span className="text-xs text-[var(--color-text-subtle)]">#{m.order_index}</span>{' '}
             <span className="font-medium">{m.title}</span>
           </div>
           <ModuleRowActions
@@ -448,11 +498,11 @@ export function LessonRow({
     );
   }
   return (
-    <div className="flex items-center justify-between rounded-md px-2 py-1.5 hover:bg-slate-50">
-      <a href={href} className="text-sm text-slate-800 hover:underline">
-        <span className="text-xs text-slate-400">#{lesson.order_index}</span>{' '}
+    <div className="flex items-center justify-between rounded-md px-2 py-1.5 hover:bg-[var(--surface-muted)]">
+      <a href={href} className="text-sm text-[var(--color-text)] hover:underline">
+        <span className="text-xs text-[var(--color-text-subtle)]">#{lesson.order_index}</span>{' '}
         {lesson.title}{' '}
-        <span className="text-xs text-slate-400">({lesson.est_minutes ?? 0} min)</span>
+        <span className="text-xs text-[var(--color-text-subtle)]">({lesson.est_minutes ?? 0} min)</span>
       </a>
       <LessonRowActions
         lesson={lesson}

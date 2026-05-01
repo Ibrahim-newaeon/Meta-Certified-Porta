@@ -62,7 +62,7 @@ export default async function LessonAdminPage({
         {trackId && (
           <Link
             href={`/admin/tracks/${trackId}`}
-            className="text-xs text-slate-500 hover:underline"
+            className="text-xs text-[var(--color-text-muted)] hover:underline"
           >
             ← Track
           </Link>
@@ -70,11 +70,11 @@ export default async function LessonAdminPage({
         <div className="mt-1 flex items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl font-semibold">{lesson.title}</h1>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-[var(--color-text-muted)]">
               {lesson.est_minutes ?? 0} min · Module: {moduleTitle ?? '—'}
             </p>
             {lesson.summary && (
-              <p className="mt-2 max-w-2xl text-sm text-slate-700">{lesson.summary}</p>
+              <p className="mt-2 max-w-2xl text-sm text-[var(--color-text-muted)]">{lesson.summary}</p>
             )}
           </div>
           {trackId && (
@@ -93,10 +93,10 @@ export default async function LessonAdminPage({
       </div>
 
       <section>
-        <h2 className="mb-2 text-sm font-medium text-slate-700">Resources</h2>
-        <div className="overflow-hidden rounded-lg border bg-white">
+        <h2 className="mb-2 text-sm font-medium text-[var(--color-text-muted)]">Resources</h2>
+        <div className="overflow-x-auto rounded-lg border border-[var(--border)] bg-[var(--surface)]">
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
+            <thead className="bg-[var(--surface-muted)] text-left text-xs uppercase text-[var(--color-text-muted)]">
               <tr>
                 <th className="px-3 py-2">Kind</th>
                 <th className="px-3 py-2">Title</th>
@@ -107,10 +107,10 @@ export default async function LessonAdminPage({
             </thead>
             <tbody>
               {rows.map((r, idx) => (
-                <tr key={r.id} className="border-t">
+                <tr key={r.id} className="border-t border-[var(--border)]">
                   <td className="px-3 py-2 font-mono text-xs uppercase">{r.kind}</td>
                   <td className="px-3 py-2">{r.title}</td>
-                  <td className="px-3 py-2 text-xs text-slate-500">
+                  <td className="px-3 py-2 text-xs text-[var(--color-text-muted)]">
                     {r.kind === 'link' && (
                       <a
                         href={r.url ?? '#'}
@@ -129,7 +129,7 @@ export default async function LessonAdminPage({
                     {r.kind === 'video' && (
                       <span>
                         {r.video_asset_id === 'pending' ? (
-                          <span className="text-amber-600">
+                          <span className="text-[var(--color-warn-fg)]">
                             Encoding (waiting on Mux webhook)
                           </span>
                         ) : (
@@ -145,7 +145,7 @@ export default async function LessonAdminPage({
                       {r.exam_codes.map((c) => (
                         <span
                           key={c}
-                          className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-[10px]"
+                          className="rounded bg-[var(--color-neutral-bg)] px-1.5 py-0.5 font-mono text-[10px] text-[var(--color-neutral-fg)]"
                         >
                           {c}
                         </span>
@@ -171,7 +171,7 @@ export default async function LessonAdminPage({
               ))}
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-3 py-6 text-center text-slate-500">
+                  <td colSpan={5} className="px-3 py-6 text-center text-[var(--color-text-muted)]">
                     No resources yet — add one below.
                   </td>
                 </tr>
@@ -183,9 +183,9 @@ export default async function LessonAdminPage({
 
       {rows.some((r) => r.kind === 'pdf') && (
         <section>
-          <h2 className="mb-2 text-sm font-medium text-slate-700">AI quiz</h2>
-          <div className="rounded-lg border bg-white p-4">
-            <p className="mb-3 text-xs text-slate-600">
+          <h2 className="mb-2 text-sm font-medium text-[var(--color-text-muted)]">AI quiz</h2>
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4">
+            <p className="mb-3 text-xs text-[var(--color-text-muted)]">
               Generate a Meta-style practice quiz from this lesson&apos;s PDF content. The
               quiz is scoped to this lesson and added to the quizzes table; learners can
               take it at <span className="font-mono">/exam/&lt;quizId&gt;</span>.
@@ -200,15 +200,15 @@ export default async function LessonAdminPage({
 
       <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <div>
-          <h3 className="mb-2 text-sm font-medium text-slate-700">Add link</h3>
+          <h3 className="mb-2 text-sm font-medium text-[var(--color-text-muted)]">Add link</h3>
           <ResourceLinkForm lessonId={lesson.id} />
         </div>
         <div>
-          <h3 className="mb-2 text-sm font-medium text-slate-700">Add PDF</h3>
+          <h3 className="mb-2 text-sm font-medium text-[var(--color-text-muted)]">Add PDF</h3>
           <ResourcePdfForm lessonId={lesson.id} />
         </div>
         <div>
-          <h3 className="mb-2 text-sm font-medium text-slate-700">Add video</h3>
+          <h3 className="mb-2 text-sm font-medium text-[var(--color-text-muted)]">Add video</h3>
           <ResourceVideoForm lessonId={lesson.id} />
         </div>
       </section>

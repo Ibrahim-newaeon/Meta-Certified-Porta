@@ -8,11 +8,11 @@ import { saveProgressAction } from '@/app/(learner)/lessons/actions';
 // avoid SSR-evaluating them.
 const PdfViewer = dynamic(() => import('./pdf-viewer').then((m) => m.PdfViewer), {
   ssr: false,
-  loading: () => <div className="rounded-lg border bg-white p-6 text-sm text-slate-500">Loading PDF viewer…</div>,
+  loading: () => <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-6 text-sm text-[var(--color-text-muted)]">Loading PDF viewer…</div>,
 });
 const VideoPlayer = dynamic(() => import('./video-player').then((m) => m.VideoPlayer), {
   ssr: false,
-  loading: () => <div className="rounded-lg border bg-white p-6 text-sm text-slate-500">Loading player…</div>,
+  loading: () => <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-6 text-sm text-[var(--color-text-muted)]">Loading player…</div>,
 });
 
 export type PreparedResource = {
@@ -58,22 +58,26 @@ export function LessonViewer({
   }
 
   return (
-    <div className="grid grid-cols-1 gap-6 p-6 lg:grid-cols-[260px_1fr]">
+    <div className="grid grid-cols-1 gap-6 p-4 sm:p-6 xl:grid-cols-[260px_1fr]">
       <aside>
-        <div className="mb-3 text-xs uppercase text-slate-500">Lesson</div>
+        <div className="mb-3 text-xs uppercase text-[var(--color-text-muted)]">Lesson</div>
         <h2 className="mb-4 font-semibold">{lessonTitle}</h2>
         <ul className="space-y-1">
           {resources.map((r) => (
             <li key={r.id}>
               <button
                 onClick={() => setActiveId(r.id)}
-                className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm ${
-                  r.id === activeId ? 'bg-slate-900 text-white' : 'hover:bg-slate-100'
+                className={`flex w-full min-h-11 items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors ${
+                  r.id === activeId
+                    ? 'bg-[var(--color-primary)] text-[var(--color-primary-fg)]'
+                    : 'hover:bg-[var(--surface-muted)]'
                 }`}
               >
                 <span
                   className={`rounded px-1.5 py-0.5 font-mono text-[10px] uppercase ${
-                    r.id === activeId ? 'bg-white/20' : 'bg-slate-200'
+                    r.id === activeId
+                      ? 'bg-[var(--color-primary-fg)]/15 text-[var(--color-primary-fg)]'
+                      : 'bg-[var(--color-neutral-bg)] text-[var(--color-neutral-fg)]'
                   }`}
                 >
                   {r.kind}
@@ -83,7 +87,7 @@ export function LessonViewer({
             </li>
           ))}
           {resources.length === 0 && (
-            <li className="text-sm text-slate-500">No resources in this lesson yet.</li>
+            <li className="text-sm text-[var(--color-text-muted)]">No resources in this lesson yet.</li>
           )}
         </ul>
       </aside>
@@ -110,7 +114,7 @@ export function LessonViewer({
           />
         )}
         {!active && (
-          <div className="rounded-lg border bg-white p-8 text-center text-sm text-slate-500">
+          <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-8 text-center text-sm text-[var(--color-text-muted)]">
             Select a resource to begin.
           </div>
         )}

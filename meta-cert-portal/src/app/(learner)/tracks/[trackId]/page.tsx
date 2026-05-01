@@ -56,16 +56,16 @@ export default async function TrackDetailPage({
   return (
     <div className="space-y-6 p-6">
       <div>
-        <Link href="/tracks" className="text-xs text-slate-500 hover:underline">
+        <Link href="/tracks" className="text-xs text-[var(--color-text-muted)] hover:underline">
           ← All tracks
         </Link>
         <h1 className="mt-1 text-2xl font-semibold">
-          <span className="font-mono text-slate-500">{track.code}</span> · {track.title}
+          <span className="font-mono text-[var(--color-text-muted)]">{track.code}</span> · {track.title}
         </h1>
         {track.description && (
-          <p className="mt-2 max-w-2xl text-sm text-slate-600">{track.description}</p>
+          <p className="mt-2 max-w-2xl text-sm text-[var(--color-text-muted)]">{track.description}</p>
         )}
-        <div className="mt-1 text-xs text-slate-500">
+        <div className="mt-1 text-xs text-[var(--color-text-muted)]">
           {track.exam_minutes} min exam · {track.pass_score}% to pass
         </div>
       </div>
@@ -73,7 +73,7 @@ export default async function TrackDetailPage({
       <div className="flex items-center gap-3">
         {enrolled ? (
           <>
-            <span className="rounded-md bg-green-100 px-3 py-1 text-sm font-medium text-green-800">
+            <span className="inline-flex h-8 items-center rounded-md bg-[var(--color-success-bg)] px-3 text-sm font-medium text-[var(--color-success-fg)]">
               You&apos;re enrolled
             </span>
             <UnenrollButton trackId={track.id} />
@@ -86,42 +86,51 @@ export default async function TrackDetailPage({
       <section className="space-y-4">
         <h2 className="text-lg font-semibold">Curriculum</h2>
         {(modules ?? []).map((m) => (
-          <div key={m.id} className="rounded-lg border bg-white p-4">
+          <div key={m.id} className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4">
             <div className="mb-2 text-sm font-medium">{m.title}</div>
             <ul className="space-y-1">
               {(m.lessons ?? []).map((l) => {
                 const status = progressMap.get(l.id as string);
+                const statusLabel =
+                  status === 'completed'
+                    ? 'Completed'
+                    : status === 'in_progress'
+                      ? 'In progress'
+                      : 'Not started';
+                const statusGlyph =
+                  status === 'completed' ? '✓' : status === 'in_progress' ? '◐' : '○';
                 return (
                   <li key={l.id} className="flex items-center justify-between text-sm">
                     <div className="flex items-center gap-2">
-                      <span className="text-slate-300">
-                        {status === 'completed' ? '✓' : status === 'in_progress' ? '◐' : '○'}
+                      <span aria-hidden="true" className="text-[var(--color-text-subtle)]">
+                        {statusGlyph}
                       </span>
+                      <span className="sr-only">{statusLabel}: </span>
                       {enrolled ? (
                         <Link
                           href={`/lessons/${l.id}`}
-                          className="text-slate-800 hover:underline"
+                          className="text-[var(--color-text)] hover:underline"
                         >
                           {l.title}
                         </Link>
                       ) : (
-                        <span className="text-slate-600">{l.title}</span>
+                        <span className="text-[var(--color-text-muted)]">{l.title}</span>
                       )}
                     </div>
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-[var(--color-text-subtle)]">
                       {l.est_minutes ?? 0} min
                     </span>
                   </li>
                 );
               })}
               {(m.lessons ?? []).length === 0 && (
-                <li className="text-xs text-slate-400">No lessons in this module yet.</li>
+                <li className="text-xs text-[var(--color-text-subtle)]">No lessons in this module yet.</li>
               )}
             </ul>
           </div>
         ))}
         {(!modules || modules.length === 0) && (
-          <p className="text-sm text-slate-500">This track has no modules yet.</p>
+          <p className="text-sm text-[var(--color-text-muted)]">This track has no modules yet.</p>
         )}
       </section>
     </div>

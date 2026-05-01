@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { requireUser } from '@/lib/auth/roles';
+import { Badge } from '@/components/shared/badge';
 
 export default async function TracksBrowsePage() {
   const { user, supabase } = await requireUser();
@@ -19,32 +20,30 @@ export default async function TracksBrowsePage() {
   return (
     <div className="space-y-6 p-6">
       <h1 className="text-2xl font-semibold">Certification tracks</h1>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {tracks.map((t) => (
           <Link
             key={t.id}
             href={`/tracks/${t.id}`}
-            className="rounded-lg border bg-white p-4 transition hover:border-slate-400 hover:shadow-sm"
+            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4 transition hover:border-[var(--border-strong)] hover:shadow-sm"
           >
             <div className="flex items-center justify-between">
-              <span className="font-mono text-xs text-slate-500">{t.code}</span>
-              {enrolledIds.has(t.id) && (
-                <span className="rounded bg-green-100 px-1.5 py-0.5 text-[10px] font-medium text-green-800">
-                  Enrolled
-                </span>
-              )}
+              <span className="font-mono text-xs text-[var(--color-text-muted)]">{t.code}</span>
+              {enrolledIds.has(t.id) && <Badge variant="success">Enrolled</Badge>}
             </div>
             <div className="mt-1 font-semibold">{t.title}</div>
             {t.description && (
-              <p className="mt-2 line-clamp-3 text-sm text-slate-600">{t.description}</p>
+              <p className="mt-2 line-clamp-3 text-sm text-[var(--color-text-muted)]">
+                {t.description}
+              </p>
             )}
-            <div className="mt-3 text-xs text-slate-500">
+            <div className="mt-3 text-xs text-[var(--color-text-muted)]">
               {t.exam_minutes} min exam · {t.pass_score}% to pass
             </div>
           </Link>
         ))}
         {tracks.length === 0 && (
-          <p className="col-span-full text-center text-sm text-slate-500">
+          <p className="col-span-full text-center text-sm text-[var(--color-text-muted)]">
             No published tracks yet — check back soon.
           </p>
         )}

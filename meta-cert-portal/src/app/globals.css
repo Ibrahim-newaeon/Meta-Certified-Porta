@@ -2,25 +2,155 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0f172a;
+  --surface: #ffffff;
+  --surface-muted: #f8fafc;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+
+  --color-text: #0f172a;
+  --color-text-muted: #475569;
+  --color-text-subtle: #64748b;
+
+  --color-primary: #0f172a;
+  --color-primary-hover: #1e293b;
+  --color-primary-fg: #ffffff;
+
+  --color-neutral-bg: #f1f5f9;
+  --color-neutral-hover: #e2e8f0;
+  --color-neutral-fg: #1e293b;
+
+  --color-focus-ring: #2563eb;
+
+  --color-scrim: rgb(15 23 42 / 0.5);
+
+  --color-success: #047857;
+  --color-success-hover: #065f46;
+  --color-success-fg-on: #ffffff;
+  --color-success-bg: #dcfce7;
+  --color-success-fg: #166534;
+  --color-success-border: #86efac;
+
+  --color-danger: #e11d48;
+  --color-danger-hover: #be123c;
+  --color-danger-fg-on: #ffffff;
+  --color-danger-bg: #fef2f2;
+  --color-danger-fg: #b91c1c;
+  --color-danger-border: #fca5a5;
+  --color-danger-strong: #047857;
+
+  --color-info-bg: #eff6ff;
+  --color-info-fg: #1d4ed8;
+
+  --color-warn-bg: #fef3c7;
+  --color-warn-fg: #92400e;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0b1120;
+    --foreground: #e2e8f0;
+    --surface: #111827;
+    --surface-muted: #1e293b;
+    --border: #1e293b;
+    --border-strong: #334155;
+
+    --color-text: #e2e8f0;
+    --color-text-muted: #cbd5e1;
+    --color-text-subtle: #94a3b8;
+
+    --color-primary: #e2e8f0;
+    --color-primary-hover: #f8fafc;
+    --color-primary-fg: #0b1120;
+
+    --color-neutral-bg: #1e293b;
+    --color-neutral-hover: #334155;
+    --color-neutral-fg: #e2e8f0;
+
+    --color-focus-ring: #60a5fa;
+
+    --color-scrim: rgb(0 0 0 / 0.7);
+
+    --color-success: #10b981;
+    --color-success-hover: #34d399;
+    --color-success-fg-on: #052e16;
+    --color-success-bg: #052e16;
+    --color-success-fg: #86efac;
+    --color-success-border: #166534;
+
+    --color-danger: #f43f5e;
+    --color-danger-hover: #fb7185;
+    --color-danger-fg-on: #450a0a;
+    --color-danger-bg: #450a0a;
+    --color-danger-fg: #fca5a5;
+    --color-danger-border: #7f1d1d;
+    --color-danger-strong: #34d399;
+
+    --color-info-bg: #172554;
+    --color-info-fg: #93c5fd;
+
+    --color-warn-bg: #422006;
+    --color-warn-fg: #fde68a;
+  }
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text: var(--color-text);
+  --color-text-muted: var(--color-text-muted);
+  --color-text-subtle: var(--color-text-subtle);
+  --color-primary: var(--color-primary);
+  --color-primary-hover: var(--color-primary-hover);
+  --color-primary-fg: var(--color-primary-fg);
+  --color-neutral-bg: var(--color-neutral-bg);
+  --color-neutral-hover: var(--color-neutral-hover);
+  --color-neutral-fg: var(--color-neutral-fg);
+  --color-focus-ring: var(--color-focus-ring);
+  --color-scrim: var(--color-scrim);
+  --color-success: var(--color-success);
+  --color-success-hover: var(--color-success-hover);
+  --color-success-fg-on: var(--color-success-fg-on);
+  --color-danger: var(--color-danger);
+  --color-danger-hover: var(--color-danger-hover);
+  --color-danger-fg-on: var(--color-danger-fg-on);
+  --color-success-bg: var(--color-success-bg);
+  --color-success-fg: var(--color-success-fg);
+  --color-success-border: var(--color-success-border);
+  --color-danger-bg: var(--color-danger-bg);
+  --color-danger-fg: var(--color-danger-fg);
+  --color-danger-border: var(--color-danger-border);
+  --color-info-bg: var(--color-info-bg);
+  --color-info-fg: var(--color-info-fg);
+  --color-warn-bg: var(--color-warn-bg);
+  --color-warn-fg: var(--color-warn-fg);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, -apple-system, Segoe UI, sans-serif;
+}
+
+@layer base {
+  :where(button, a, input, select, textarea, summary, [role="tab"], [role="button"]):focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

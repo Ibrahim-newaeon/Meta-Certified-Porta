@@ -1,8 +1,6 @@
 'use client';
-// Top-level error boundary. Catches any unhandled error from a route segment
-// and renders a generic fallback. Per Next docs, this MUST be a Client
-// Component because it uses error/reset props from React.
 import { useEffect } from 'react';
+import { Button } from '@/components/shared/button';
 
 export default function GlobalError({
   error,
@@ -20,18 +18,15 @@ export default function GlobalError({
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center gap-4 px-6 text-center">
       <h1 className="text-2xl font-semibold">Something went wrong</h1>
-      <p className="text-sm text-slate-600">
+      <p className="text-sm text-[var(--color-text-muted)]">
         We hit an unexpected error. Try again, and if it keeps happening let us know.
       </p>
       {error.digest && (
-        <p className="font-mono text-xs text-slate-400">ref: {error.digest}</p>
+        <p className="font-mono text-xs text-[var(--color-text-subtle)]">ref: {error.digest}</p>
       )}
-      <button
-        onClick={reset}
-        className="inline-flex h-10 items-center rounded-md bg-slate-900 px-5 text-sm font-medium text-white hover:bg-slate-800"
-      >
+      <Button size="lg" onClick={reset}>
         Try again
-      </button>
+      </Button>
     </div>
   );
 }

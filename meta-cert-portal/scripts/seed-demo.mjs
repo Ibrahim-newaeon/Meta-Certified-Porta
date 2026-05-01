@@ -141,16 +141,8 @@ async function ensureUser(email, password) {
   const { data: existing } = await admin.auth.admin.listUsers();
   const found = existing?.users?.find((u) => u.email === email);
   if (found) {
-    // Reset the password back to the documented demo value so re-running
-    // the seed always restores known credentials, even if the account's
-    // password drifted (manual change, earlier seed with different value).
-    const { data, error } = await admin.auth.admin.updateUserById(found.id, {
-      password,
-      email_confirm: true,
-    });
-    if (error) throw new Error(`updateUser ${email}: ${error.message}`);
-    console.log(`[user] ${email} exists (${found.id}) — password reset`);
-    return data.user;
+    console.log(`[user] ${email} exists (${found.id})`);
+    return found;
   }
   const { data, error } = await admin.auth.admin.createUser({
     email,
