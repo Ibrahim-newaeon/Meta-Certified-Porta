@@ -347,7 +347,7 @@ function FinalCta({ isSignedIn }: { isSignedIn: boolean }) {
           {isSignedIn ? (
             <Link
               href="/dashboard"
-              className="inline-flex h-11 items-center rounded-md bg-white px-6 text-sm font-medium text-[var(--color-brand-soft-fg)] shadow-sm transition-colors hover:bg-white/90"
+              className="inline-flex h-11 items-center rounded-md bg-[var(--background)] px-6 text-sm font-medium text-[var(--color-brand-soft-fg)] shadow-sm transition-colors hover:bg-[var(--surface-muted)]"
             >
               Go to dashboard
             </Link>
@@ -355,7 +355,7 @@ function FinalCta({ isSignedIn }: { isSignedIn: boolean }) {
             <>
               <Link
                 href="/register"
-                className="inline-flex h-11 items-center rounded-md bg-white px-6 text-sm font-medium text-[var(--color-brand-soft-fg)] shadow-sm transition-colors hover:bg-white/90"
+                className="inline-flex h-11 items-center rounded-md bg-[var(--background)] px-6 text-sm font-medium text-[var(--color-brand-soft-fg)] shadow-sm transition-colors hover:bg-[var(--surface-muted)]"
               >
                 Create free account
               </Link>
