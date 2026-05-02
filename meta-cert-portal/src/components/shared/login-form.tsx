@@ -1,6 +1,7 @@
 'use client';
 import { useActionState, useId, useState } from 'react';
 import { useFormStatus } from 'react-dom';
+import Link from 'next/link';
 import {
   signInAction,
   sendMagicLinkAction,
@@ -101,9 +102,17 @@ export function LoginForm({ redirectTo }: { redirectTo?: string }) {
             />
           </div>
           <div className="space-y-1.5">
-            <label htmlFor={pwPasswordId} className="block text-sm font-medium">
-              Password
-            </label>
+            <div className="flex items-baseline justify-between">
+              <label htmlFor={pwPasswordId} className="block text-sm font-medium">
+                Password
+              </label>
+              <Link
+                href="/forgot-password"
+                className="text-xs text-[var(--color-brand-soft-fg)] hover:underline"
+              >
+                Forgot password?
+              </Link>
+            </div>
             <Input
               id={pwPasswordId}
               name="password"

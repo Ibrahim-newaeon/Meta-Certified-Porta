@@ -1,5 +1,10 @@
 import { requireRole } from '@/lib/auth/roles';
-import { InviteUserForm, RoleToggle } from '@/components/admin/users-table-actions';
+import {
+  InviteUserForm,
+  RoleToggle,
+  DeleteUserButton,
+  PasswordActionsButton,
+} from '@/components/admin/users-table-actions';
 import { Badge } from '@/components/shared/badge';
 
 export default async function UsersAdminPage() {
@@ -51,12 +56,20 @@ export default async function UsersAdminPage() {
                   <td className="px-3 py-2 text-xs text-[var(--color-text-muted)]">
                     {new Date(u.created_at).toLocaleDateString()}
                   </td>
-                  <td className="px-3 py-2 text-right">
-                    <RoleToggle
-                      userId={u.id}
-                      currentRole={u.role as 'admin' | 'learner'}
-                      isSelf={u.id === user.id}
-                    />
+                  <td className="px-3 py-2">
+                    <div className="flex flex-wrap items-center justify-end gap-2">
+                      <RoleToggle
+                        userId={u.id}
+                        currentRole={u.role as 'admin' | 'learner'}
+                        isSelf={u.id === user.id}
+                      />
+                      <PasswordActionsButton userId={u.id} email={u.email} />
+                      <DeleteUserButton
+                        userId={u.id}
+                        email={u.email}
+                        isSelf={u.id === user.id}
+                      />
+                    </div>
                   </td>
                 </tr>
               ))}
