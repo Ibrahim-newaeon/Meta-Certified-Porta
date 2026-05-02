@@ -4,9 +4,9 @@ import { LoginForm } from '@/components/shared/login-form';
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ redirect?: string; error?: string }>;
+  searchParams: Promise<{ redirect?: string; error?: string; reset?: string }>;
 }) {
-  const { redirect, error } = await searchParams;
+  const { redirect, error, reset } = await searchParams;
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-12">
@@ -23,6 +23,14 @@ export default async function LoginPage({
           className="mb-4 rounded-md border border-[var(--color-danger-border)] bg-[var(--color-danger-bg)] p-3 text-sm text-[var(--color-danger-fg)]"
         >
           That sign-in link was invalid or expired. Try again.
+        </div>
+      )}
+      {reset === 'ok' && (
+        <div
+          role="status"
+          className="mb-4 rounded-md border border-[var(--color-success-border)] bg-[var(--color-success-bg)] p-3 text-sm text-[var(--color-success-fg)]"
+        >
+          Password updated. Sign in with your new password below.
         </div>
       )}
 

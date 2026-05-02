@@ -5,9 +5,14 @@ import { NextResponse, type NextRequest } from 'next/server';
 
 // Webhooks must be public — they're called by external services (Mux) without
 // our auth cookie. The handlers verify the request via signing-secret HMAC.
+//
+// /reset-password is public so the recovery callback can land users there even
+// before the recovery session cookie is set in this navigation.
 const PUBLIC_ROUTES = [
   '/login',
   '/register',
+  '/forgot-password',
+  '/reset-password',
   '/auth/callback',
   '/api/health',
   '/api/mux/webhook',

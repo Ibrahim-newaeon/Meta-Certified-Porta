@@ -47,6 +47,25 @@ export async function sendMagicLinkAction(_prev: ActionResult, formData: FormDat
   return { ok: true };
 }
 
+export async function requestPasswordResetAction(
+  _prev: ActionResult,
+  formData: FormData,
+): Promise<ActionResult> {
+  const parsed = Email.safeParse({ email: formData.get('email') });
+  if (!parsed.success) return { error: 'Enter a valid email' };
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'}/auth/callback?next=/reset-password`,
+  });
+  // SECURITY: don't surface "user not found" — would leak account existence.
+  // Other failures (rate limit, SMTP) are safe to expose.
+  if (error && !/user not found|invalid email/i.test(error.message)) {
+    return { error: error.message };
+  }
+  return { ok: true };
+}
+
 export async function signOutAction() {
   const supabase = await createClient();
   await supabase.auth.signOut();
