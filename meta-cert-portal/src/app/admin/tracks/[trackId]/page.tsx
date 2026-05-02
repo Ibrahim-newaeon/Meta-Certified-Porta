@@ -7,6 +7,7 @@ import {
   ModuleRow,
   LessonRow,
 } from '@/components/admin/inline-forms';
+import { LessonBulkSelectProvider } from '@/components/admin/lesson-bulk-select';
 
 export default async function TrackDetailPage({
   params,
@@ -49,6 +50,7 @@ export default async function TrackDetailPage({
         </p>
       </div>
 
+      <LessonBulkSelectProvider trackId={track.id}>
       <section className="space-y-3">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-medium text-[var(--color-text-muted)]">Modules</h2>
@@ -111,6 +113,7 @@ export default async function TrackDetailPage({
           )}
         </div>
       </section>
+      </LessonBulkSelectProvider>
     </div>
   );
 }

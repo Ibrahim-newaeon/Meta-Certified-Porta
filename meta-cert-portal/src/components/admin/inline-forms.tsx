@@ -15,6 +15,7 @@ import {
 } from '@/app/admin/lessons/actions';
 import { ConfirmButton } from '@/components/shared/confirm-button';
 import { Button } from '@/components/shared/button';
+import { useLessonSelect } from './lesson-bulk-select';
 
 const INPUT_SM =
   'mt-1 block h-10 w-full rounded-md border border-[var(--border-strong)] bg-[var(--surface)] px-2 text-sm text-[var(--color-text)] focus:border-[var(--color-focus-ring)] focus:ring-2 focus:ring-[var(--color-focus-ring)]/20 focus:outline-none';
@@ -486,6 +487,7 @@ export function LessonRow({
   href: string;
 }) {
   const [editing, setEditing] = useState(false);
+  const select = useLessonSelect();
   if (editing) {
     return (
       <div className="px-2 py-1.5">
@@ -497,13 +499,31 @@ export function LessonRow({
       </div>
     );
   }
+  const checked = select?.selected.has(lesson.id) ?? false;
   return (
-    <div className="flex items-center justify-between rounded-md px-2 py-1.5 hover:bg-[var(--surface-muted)]">
-      <a href={href} className="text-sm text-[var(--color-text)] hover:underline">
-        <span className="text-xs text-[var(--color-text-subtle)]">#{lesson.order_index}</span>{' '}
-        {lesson.title}{' '}
-        <span className="text-xs text-[var(--color-text-subtle)]">({lesson.est_minutes ?? 0} min)</span>
-      </a>
+    <div
+      className={`flex items-center justify-between gap-2 rounded-md px-2 py-1.5 hover:bg-[var(--surface-muted)] ${
+        checked ? 'bg-[var(--color-warn-bg)]/40' : ''
+      }`}
+    >
+      <div className="flex min-w-0 items-center gap-2">
+        {select && (
+          <input
+            type="checkbox"
+            aria-label={`Select lesson ${lesson.title}`}
+            checked={checked}
+            onChange={() => select.toggle(lesson.id)}
+            className="h-4 w-4 cursor-pointer accent-[var(--color-primary)]"
+          />
+        )}
+        <a href={href} className="truncate text-sm text-[var(--color-text)] hover:underline">
+          <span className="text-xs text-[var(--color-text-subtle)]">#{lesson.order_index}</span>{' '}
+          {lesson.title}{' '}
+          <span className="text-xs text-[var(--color-text-subtle)]">
+            ({lesson.est_minutes ?? 0} min)
+          </span>
+        </a>
+      </div>
       <LessonRowActions
         lesson={lesson}
         moduleId={moduleId}

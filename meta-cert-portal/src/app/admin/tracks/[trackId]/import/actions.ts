@@ -14,6 +14,8 @@ export type ImportResult = {
 
 const Input = z.object({
   trackId: z.string().uuid(),
+  // Either an existing module id, or empty/'new' to create one with moduleTitle.
+  moduleId: z.string().uuid().optional().nullable(),
   moduleTitle: z.string().min(1).max(200).default('Imported lessons'),
 });
 
@@ -36,14 +38,16 @@ export async function bulkImportLessonsFromZipAction(
 ): Promise<ImportResult> {
   await requireRole('admin');
 
+  const rawModuleId = String(formData.get('moduleId') ?? '').trim();
   const parsed = Input.safeParse({
     trackId: formData.get('trackId'),
+    moduleId: rawModuleId === '' || rawModuleId === 'new' ? null : rawModuleId,
     moduleTitle: String(formData.get('moduleTitle') ?? '').trim() || undefined,
   });
   if (!parsed.success) {
     return { error: parsed.error.issues[0]?.message ?? 'Invalid input' };
   }
-  const { trackId, moduleTitle } = parsed.data;
+  const { trackId, moduleId: targetModuleId, moduleTitle } = parsed.data;
 
   const file = formData.get('zip') as File | null;
   if (!file) return { error: 'Choose a .zip file' };
@@ -77,27 +81,58 @@ export async function bulkImportLessonsFromZipAction(
     .single();
   if (!track) return { error: 'Track not found' };
 
-  // Find the next module order_index for this track.
-  const { data: existingMods } = await admin
-    .from('modules')
-    .select('order_index')
-    .eq('track_id', trackId)
-    .order('order_index', { ascending: false })
-    .limit(1);
-  const nextModuleOrder = (existingMods?.[0]?.order_index ?? -1) + 1;
+  // Resolve destination module: either an existing one on this track, or create a new one.
+  let mod: { id: string };
+  let resolvedModuleTitle = moduleTitle;
+  let lessonOrderOffset = 0;
 
-  // Create the destination module.
-  const { data: mod, error: modErr } = await admin
-    .from('modules')
-    .insert({
-      track_id: trackId,
-      title: moduleTitle,
-      order_index: nextModuleOrder,
-    })
-    .select('id')
-    .single();
-  if (modErr || !mod) {
-    return { error: modErr?.message ?? 'Could not create module' };
+  if (targetModuleId) {
+    // Verify the module belongs to this track (don't trust client input).
+    const { data: existing, error: lookupErr } = await admin
+      .from('modules')
+      .select('id, title, track_id')
+      .eq('id', targetModuleId)
+      .single();
+    if (lookupErr || !existing) {
+      return { error: 'Selected module not found.' };
+    }
+    if (existing.track_id !== trackId) {
+      return { error: 'Selected module belongs to a different track.' };
+    }
+    mod = { id: existing.id };
+    resolvedModuleTitle = existing.title;
+
+    // Append after the module's existing lessons.
+    const { data: tail } = await admin
+      .from('lessons')
+      .select('order_index')
+      .eq('module_id', mod.id)
+      .order('order_index', { ascending: false })
+      .limit(1);
+    lessonOrderOffset = (tail?.[0]?.order_index ?? -1) + 1;
+  } else {
+    // Find the next module order_index for this track.
+    const { data: existingMods } = await admin
+      .from('modules')
+      .select('order_index')
+      .eq('track_id', trackId)
+      .order('order_index', { ascending: false })
+      .limit(1);
+    const nextModuleOrder = (existingMods?.[0]?.order_index ?? -1) + 1;
+
+    const { data: created, error: modErr } = await admin
+      .from('modules')
+      .insert({
+        track_id: trackId,
+        title: moduleTitle,
+        order_index: nextModuleOrder,
+      })
+      .select('id')
+      .single();
+    if (modErr || !created) {
+      return { error: modErr?.message ?? 'Could not create module' };
+    }
+    mod = { id: created.id };
   }
 
   let importedCount = 0;
@@ -134,7 +169,7 @@ export async function bulkImportLessonsFromZipAction(
         module_id: mod.id,
         title: title.slice(0, 200),
         summary: text.slice(0, 500).trim(),
-        order_index: i,
+        order_index: lessonOrderOffset + i,
         est_minutes: estMinutes,
       })
       .select('id')
@@ -174,7 +209,7 @@ export async function bulkImportLessonsFromZipAction(
 
   return {
     ok: true,
-    imported: { module: moduleTitle, lessons: importedCount },
+    imported: { module: resolvedModuleTitle, lessons: importedCount },
     warning,
   };
 }
