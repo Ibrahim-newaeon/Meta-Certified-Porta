@@ -71,6 +71,19 @@ export function ResourceLinkForm({ lessonId }: { lessonId: string }) {
           {state.error}
         </p>
       )}
+      {state?.warning && (
+        <div
+          role="status"
+          className="rounded-md border border-[var(--color-warn-fg)]/30 bg-[var(--color-warn-bg)] p-3 text-xs text-[var(--color-warn-fg)]"
+        >
+          <strong>Saved with warning:</strong> {state.warning}
+        </div>
+      )}
+      {state?.ok && !state.warning && (
+        <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">
+          Link added — text extracted for AI features.
+        </p>
+      )}
       <Submit label="Add link" pendingLabel="Adding link…" />
     </form>
   );

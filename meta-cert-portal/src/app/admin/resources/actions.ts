@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { requireRole } from '@/lib/auth/roles';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { extractPdfText } from '@/lib/pdf/extract';
+import { extractTextFromUrl } from '@/lib/url/extract';
 import { getMux } from '@/lib/mux/client';
 
 type Result = {
@@ -38,6 +39,25 @@ export async function createLinkResourceAction(
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Invalid input' };
 
   const d = parsed.data;
+
+  // Best-effort fetch + text-extract so the AI tutor and quiz generator can
+  // ground on this link. Failures don't block creation — admin can retry via
+  // the Re-extract button.
+  let extractedText = '';
+  let extractWarning: string | null = null;
+  try {
+    const out = await extractTextFromUrl(d.url);
+    extractedText = out.text;
+    if (extractedText.trim().length === 0) {
+      extractWarning =
+        'Link saved but no text could be extracted (likely a JS-rendered page or empty body). AI features need extractable text.';
+    }
+  } catch (e) {
+    const detail = e instanceof Error ? e.message : 'unknown';
+    extractWarning = `Link saved; text fetch failed: ${detail}. Use "Re-extract" after fixing access.`;
+    console.error('[createLinkResourceAction] extractTextFromUrl failed', e);
+  }
+
   const { error } = await supabase.from('resources').insert({
     lesson_id: d.lessonId,
     kind: 'link',
@@ -45,9 +65,53 @@ export async function createLinkResourceAction(
     url: d.url,
     exam_codes: d.examCodes,
     order_index: d.orderIndex,
+    extracted_text: extractedText.slice(0, 1_000_000),
   });
   if (error) return { error: error.message };
   revalidatePath(`/admin/lessons/${d.lessonId}`);
+  return extractWarning ? { ok: true, warning: extractWarning } : { ok: true };
+}
+
+export async function reExtractLinkResourceAction(
+  resourceId: string,
+): Promise<Result> {
+  await requireRole('admin');
+  z.string().uuid().parse(resourceId);
+
+  const admin = createAdminClient();
+
+  const { data: row, error: rowErr } = await admin
+    .from('resources')
+    .select('id, lesson_id, url, kind')
+    .eq('id', resourceId)
+    .single();
+  if (rowErr || !row) return { error: rowErr?.message ?? 'Resource not found' };
+  if (row.kind !== 'link') return { error: 'Not a link resource' };
+  if (!row.url) return { error: 'Link has no URL' };
+
+  let text = '';
+  try {
+    const out = await extractTextFromUrl(row.url);
+    text = out.text;
+  } catch (e) {
+    const detail = e instanceof Error ? e.message : 'unknown';
+    return { error: `Text fetch failed: ${detail}` };
+  }
+
+  if (text.trim().length === 0) {
+    return {
+      error:
+        'Page returned no extractable text (JS-rendered SPA, empty body, or the site blocks bots).',
+    };
+  }
+
+  const { error: upErr } = await admin
+    .from('resources')
+    .update({ extracted_text: text.slice(0, 1_000_000) })
+    .eq('id', resourceId);
+  if (upErr) return { error: upErr.message };
+
+  revalidatePath(`/admin/lessons/${row.lesson_id}`);
   return { ok: true };
 }
 
