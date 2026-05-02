@@ -1,12 +1,12 @@
 'use client';
-import { useActionState, useId } from 'react';
+import { useActionState, useId, useState } from 'react';
 import { useFormStatus } from 'react-dom';
 import {
   bulkImportLessonsFromZipAction,
   type ImportResult,
 } from '@/app/admin/tracks/[trackId]/import/actions';
 import { Button } from '@/components/shared/button';
-import { Input, FieldLabel } from '@/components/shared/input';
+import { Input, Select, FieldLabel } from '@/components/shared/input';
 
 function Submit() {
   const { pending } = useFormStatus();
@@ -17,13 +17,27 @@ function Submit() {
   );
 }
 
-export function ImportZipForm({ trackId }: { trackId: string }) {
+type Module = { id: string; title: string; order_index: number };
+
+export function ImportZipForm({
+  trackId,
+  modules,
+}: {
+  trackId: string;
+  modules: Module[];
+}) {
   const [state, action] = useActionState<ImportResult, FormData>(
     bulkImportLessonsFromZipAction,
     null,
   );
-  const moduleId = useId();
+  const [moduleChoice, setModuleChoice] = useState<string>(
+    modules[0]?.id ?? 'new',
+  );
+  const moduleSelectId = useId();
+  const moduleTitleId = useId();
   const fileId = useId();
+
+  const isNew = moduleChoice === 'new';
 
   return (
     <form
@@ -33,16 +47,45 @@ export function ImportZipForm({ trackId }: { trackId: string }) {
       <input type="hidden" name="trackId" value={trackId} />
 
       <div>
-        <FieldLabel htmlFor={moduleId}>New module title</FieldLabel>
-        <Input
-          id={moduleId}
-          name="moduleTitle"
-          defaultValue="Imported lessons"
-          required
-          maxLength={200}
+        <FieldLabel htmlFor={moduleSelectId}>Destination</FieldLabel>
+        <Select
+          id={moduleSelectId}
+          name="moduleId"
+          value={moduleChoice}
+          onChange={(e) => setModuleChoice(e.target.value)}
           className="mt-1"
-        />
+        >
+          <option value="new">+ Create a new module</option>
+          {modules.length > 0 && (
+            <optgroup label="Append to existing module">
+              {modules.map((m) => (
+                <option key={m.id} value={m.id}>
+                  #{m.order_index + 1} · {m.title}
+                </option>
+              ))}
+            </optgroup>
+          )}
+        </Select>
+        <p className="mt-1 text-xs text-[var(--color-text-subtle)]">
+          {isNew
+            ? 'A new module will be added at the end of this track.'
+            : 'Lessons append after the existing lessons in that module.'}
+        </p>
       </div>
+
+      {isNew && (
+        <div>
+          <FieldLabel htmlFor={moduleTitleId}>New module title</FieldLabel>
+          <Input
+            id={moduleTitleId}
+            name="moduleTitle"
+            defaultValue="Imported lessons"
+            required
+            maxLength={200}
+            className="mt-1"
+          />
+        </div>
+      )}
 
       <div>
         <FieldLabel htmlFor={fileId}>Zip file (.docx files inside, max 25 MB)</FieldLabel>

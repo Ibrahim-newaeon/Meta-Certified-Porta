@@ -18,6 +18,12 @@ export default async function ImportPage({
     .single();
   if (!track) notFound();
 
+  const { data: modules } = await supabase
+    .from('modules')
+    .select('id, title, order_index')
+    .eq('track_id', trackId)
+    .order('order_index');
+
   return (
     <div className="space-y-6">
       <div>
@@ -29,14 +35,14 @@ export default async function ImportPage({
         </Link>
         <h1 className="mt-1 text-2xl font-semibold">Bulk import lessons</h1>
         <p className="mt-1 text-sm text-[var(--color-text-muted)]">
-          Upload a .zip of .docx files. Each .docx becomes one lesson under a new
-          module. Files are sorted naturally — prefix names with{' '}
-          <span className="font-mono">01_</span>, <span className="font-mono">02_</span>{' '}
-          to control order.
+          Upload a .zip of .docx files. Each .docx becomes one lesson under
+          either a new module or an existing one on this track. Files are sorted
+          naturally — prefix names with <span className="font-mono">01_</span>,{' '}
+          <span className="font-mono">02_</span> to control order.
         </p>
       </div>
 
-      <ImportZipForm trackId={track.id} />
+      <ImportZipForm trackId={track.id} modules={modules ?? []} />
 
       <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] p-4 text-xs text-[var(--color-text-muted)]">
         <p className="font-medium text-[var(--color-text)]">What gets created</p>

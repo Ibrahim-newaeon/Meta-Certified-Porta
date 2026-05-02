@@ -133,3 +133,28 @@ export async function deleteLessonAction(id: string, trackId: string) {
   revalidatePath(`/admin/tracks/${trackId}`);
   revalidatePath(`/admin/lessons/${id}`);
 }
+
+const BulkDeleteInput = z.object({
+  ids: z.array(z.string().uuid()).min(1).max(500),
+  trackId: z.string().uuid(),
+});
+
+export async function bulkDeleteLessonsAction(
+  ids: string[],
+  trackId: string,
+): Promise<{ ok?: boolean; error?: string; deleted?: number }> {
+  const { supabase } = await requireRole('admin');
+  const parsed = BulkDeleteInput.safeParse({ ids, trackId });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? 'Invalid input' };
+  }
+
+  const { error, count } = await supabase
+    .from('lessons')
+    .delete({ count: 'exact' })
+    .in('id', parsed.data.ids);
+  if (error) return { error: error.message };
+
+  revalidatePath(`/admin/tracks/${trackId}`);
+  return { ok: true, deleted: count ?? parsed.data.ids.length };
+}
