@@ -16,8 +16,12 @@ export async function extractPdfText(
 ): Promise<{ text: string; pageCount: number }> {
   const { extractText, getDocumentProxy } = await import('unpdf');
 
-  const data =
-    source instanceof Uint8Array ? source : new Uint8Array(source);
+  // unpdf rejects Node Buffer instances even though Buffer extends Uint8Array.
+  // Uint8Array.from copies the bytes into a plain Uint8Array (sharing no
+  // prototype with Buffer) which is what unpdf expects.
+  const data = source instanceof Uint8Array
+    ? Uint8Array.from(source)
+    : new Uint8Array(source);
 
   const doc = await getDocumentProxy(data);
   // mergePages: true makes text a single string (already joined per-page).
