@@ -10,12 +10,15 @@ const nextConfig: NextConfig = {
   // deploy target needs the postbuild script in scripts/standalone-postbuild.mjs.
   output: 'standalone',
 
-  // pdfjs-dist's legacy build is loaded via dynamic import (`pdfjs-dist/legacy/
-  // build/pdf.mjs`). Next's tracer can't always follow string-constructed paths
-  // into the standalone bundle, so on Railway/Docker the file is missing at
-  // runtime → extraction fails silently. Marking it server-external loads the
-  // package straight from node_modules at runtime instead of trying to bundle.
-  serverExternalPackages: ['pdfjs-dist'],
+  // unpdf is the server-side PDF text extractor (pdfjs-dist's Node build
+  // throws "DOMMatrix is not defined" without browser globals). Marking it
+  // server-external keeps Next from bundling its dynamic-imported sub-paths
+  // and just loads it from node_modules at runtime.
+  //
+  // pdfjs-dist itself is kept in the list because react-pdf depends on it
+  // transitively for client-side rendering — it should not be bundled into
+  // server output.
+  serverExternalPackages: ['unpdf', 'pdfjs-dist'],
 };
 
 export default nextConfig;
