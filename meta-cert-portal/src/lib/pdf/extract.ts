@@ -1,41 +1,27 @@
 import 'server-only';
 
-// Server-side PDF text extraction using pdfjs-dist (already installed).
-// Avoids adding `pdf-parse` (which has a notorious test-fixture loading bug).
+// Server-side PDF text extraction.
 //
-// Returns the concatenated text content and page count. The caller stores
-// the text into `resources.extracted_text` (capped at ~1MB) for the AI tutor
-// to use as lesson context.
+// Uses `unpdf` — a Node/edge-friendly fork of pdfjs that doesn't require
+// DOMMatrix or other browser globals at import time. The original
+// `pdfjs-dist/legacy/build/pdf.mjs` import threw "DOMMatrix is not defined"
+// in the Railway Node runtime even though the legacy build is supposed to
+// work without a DOM.
+//
+// `react-pdf` (the client-side viewer) still uses pdfjs-dist via dynamic
+// import in the browser, where DOMMatrix is native — no conflict.
 
 export async function extractPdfText(
-  source: Buffer | ArrayBuffer | Uint8Array
+  source: Buffer | ArrayBuffer | Uint8Array,
 ): Promise<{ text: string; pageCount: number }> {
-  // Dynamic import — pdfjs-dist's ESM entry has top-level await issues when
-  // imported eagerly in some Next runtimes.
-  const pdfjs = await import('pdfjs-dist/legacy/build/pdf.mjs');
+  const { extractText, getDocumentProxy } = await import('unpdf');
 
-  // Buffer extends Uint8Array, so this also handles Node Buffer.
   const data =
-    source instanceof Uint8Array
-      ? source
-      : new Uint8Array(source);
+    source instanceof Uint8Array ? source : new Uint8Array(source);
 
-  const doc = await pdfjs.getDocument({
-    data,
-    disableFontFace: true,
-    useSystemFonts: false,
-  }).promise;
+  const doc = await getDocumentProxy(data);
+  // mergePages: true makes text a single string (already joined per-page).
+  const { totalPages, text } = await extractText(doc, { mergePages: true });
 
-  const pages: string[] = [];
-  for (let i = 1; i <= doc.numPages; i++) {
-    const page = await doc.getPage(i);
-    const tc = await page.getTextContent();
-    const text = tc.items
-      .map((item) => ('str' in item ? item.str : ''))
-      .filter(Boolean)
-      .join(' ');
-    pages.push(text);
-  }
-
-  return { text: pages.join('\n\n'), pageCount: doc.numPages };
+  return { text, pageCount: totalPages };
 }
