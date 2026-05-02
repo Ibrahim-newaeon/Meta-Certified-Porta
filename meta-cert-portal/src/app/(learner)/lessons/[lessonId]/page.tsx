@@ -27,7 +27,7 @@ export default async function LessonPage({
   const { data: resources } = await supabase
     .from('resources')
     .select(
-      'id, kind, title, order_index, url, storage_bucket, storage_path, page_count, video_provider, video_asset_id, video_playback_id, video_duration_s, video_url'
+      'id, kind, title, order_index, url, storage_bucket, storage_path, page_count, video_provider, video_asset_id, video_playback_id, video_duration_s, video_url, extracted_text'
     )
     .eq('lesson_id', lessonId)
     .order('order_index');
@@ -91,6 +91,9 @@ export default async function LessonPage({
         } catch {
           /* leave undefined; UI will show "loading" forever — acceptable for now */
         }
+      }
+      if (r.kind === 'text' && r.extracted_text) {
+        base.textContent = r.extracted_text;
       }
       if (r.kind === 'video' && r.video_provider === 'mux' && r.video_playback_id && r.video_asset_id !== 'pending') {
         try {

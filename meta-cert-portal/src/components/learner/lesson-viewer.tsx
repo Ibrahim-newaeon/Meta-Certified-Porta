@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { LinkCard } from './link-card';
+import { TextViewer } from './text-viewer';
 import { saveProgressAction } from '@/app/(learner)/lessons/actions';
 
 // Dynamic imports — react-pdf and Mux Player both depend on the DOM, so we
@@ -17,13 +18,14 @@ const VideoPlayer = dynamic(() => import('./video-player').then((m) => m.VideoPl
 
 export type PreparedResource = {
   id: string;
-  kind: 'link' | 'pdf' | 'video';
+  kind: 'link' | 'pdf' | 'video' | 'text';
   title: string;
   order_index: number;
   url: string | null;
   signedUrl?: string;
   video_playback_id: string | null;
   videoTokens?: { playback: string; thumbnail: string; storyboard: string };
+  textContent?: string;
 };
 
 export function LessonViewer({
@@ -111,6 +113,13 @@ export function LessonViewer({
             startSeconds={initialPosition || 0}
             onTime={(t) => reportPosition(t)}
             onEnd={reportComplete}
+          />
+        )}
+        {active?.kind === 'text' && active.textContent && (
+          <TextViewer
+            title={active.title}
+            content={active.textContent}
+            onComplete={reportComplete}
           />
         )}
         {!active && (
