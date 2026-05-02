@@ -35,22 +35,29 @@ export async function POST(req: NextRequest) {
 
   const admin = createAdminClient();
 
-  // Pull the lesson's PDF text. Without it we have nothing to ground on.
-  const { data: pdf } = await admin
+  // Pull text from every resource on the lesson — PDFs and links both
+  // populate `extracted_text` now. Concatenate in order_index order so the
+  // model gets material in the same sequence learners see it.
+  const { data: rows } = await admin
     .from('resources')
-    .select('extracted_text, lesson_id')
+    .select('extracted_text, kind, title, order_index')
     .eq('lesson_id', body.lessonId)
-    .eq('kind', 'pdf')
-    .order('order_index')
-    .limit(1)
-    .maybeSingle();
+    .in('kind', ['pdf', 'link'])
+    .order('order_index');
 
-  if (!pdf?.extracted_text) {
+  const blocks = (rows ?? [])
+    .filter((r) => r.extracted_text && r.extracted_text.trim().length > 0)
+    .map((r) => `[${r.kind.toUpperCase()}: ${r.title}]\n${r.extracted_text!}`);
+
+  if (blocks.length === 0) {
     return NextResponse.json(
-      { error: 'no_pdf_context_for_lesson' },
+      { error: 'no_text_context_for_lesson' },
       { status: 400 }
     );
   }
+
+  // Cap total context at ~40k chars across all sources.
+  const combined = blocks.join('\n\n').slice(0, 40_000);
 
   const userMsg = [
     `Generate ${body.count} questions from the study material below.`,
@@ -58,7 +65,7 @@ export async function POST(req: NextRequest) {
     `Exam tags: ${body.examCodes.join(', ') || 'general Meta Blueprint'}`,
     ``,
     `<study_material>`,
-    pdf.extracted_text.slice(0, 40_000),
+    combined,
     `</study_material>`,
   ].join('\n');
 

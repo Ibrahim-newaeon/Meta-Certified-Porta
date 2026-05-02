@@ -5,6 +5,7 @@ import {
   updateResourceAction,
   deleteResourceAction,
   reExtractPdfResourceAction,
+  reExtractLinkResourceAction,
 } from '@/app/admin/resources/actions';
 import { Dialog } from '@/components/shared/dialog';
 import { ConfirmButton } from '@/components/shared/confirm-button';
@@ -58,7 +59,9 @@ export function ResourceRowActions({
         >
           <span aria-hidden="true">↓</span>
         </Button>
-        {resource.kind === 'pdf' && <ReExtractButton resourceId={resource.id} />}
+        {(resource.kind === 'pdf' || resource.kind === 'link') && (
+          <ReExtractButton resourceId={resource.id} kind={resource.kind} />
+        )}
         <Button variant="secondary" size="sm" onClick={() => setEditing(true)}>
           Edit
         </Button>
@@ -187,24 +190,37 @@ function ResourceEditDialog({
   );
 }
 
-function ReExtractButton({ resourceId }: { resourceId: string }) {
+function ReExtractButton({
+  resourceId,
+  kind,
+}: {
+  resourceId: string;
+  kind: 'pdf' | 'link';
+}) {
   const [pending, start] = useTransition();
   const [feedback, setFeedback] = useState<{
     kind: 'ok' | 'err';
     message: string;
   } | null>(null);
 
+  const action =
+    kind === 'pdf' ? reExtractPdfResourceAction : reExtractLinkResourceAction;
+  const tooltip =
+    kind === 'pdf'
+      ? 'Re-run text extraction on this PDF'
+      : 'Re-fetch this URL and extract its text';
+
   return (
     <>
       <Button
         variant="secondary"
         size="sm"
-        title="Re-run text extraction on this PDF (use after a deploy that fixed extraction)"
+        title={tooltip}
         disabled={pending}
         onClick={() => {
           setFeedback(null);
           start(async () => {
-            const res = await reExtractPdfResourceAction(resourceId);
+            const res = await action(resourceId);
             if (res?.error) {
               setFeedback({ kind: 'err', message: res.error });
             } else {

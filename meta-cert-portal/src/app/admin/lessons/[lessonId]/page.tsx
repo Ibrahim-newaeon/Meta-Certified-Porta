@@ -181,14 +181,16 @@ export default async function LessonAdminPage({
         </div>
       </section>
 
-      {rows.some((r) => r.kind === 'pdf') && (
+      {rows.some((r) => r.kind === 'pdf' || r.kind === 'link') && (
         <section>
           <h2 className="mb-2 text-sm font-medium text-[var(--color-text-muted)]">AI quiz</h2>
           <div className="rounded-lg border border-[var(--border)] bg-[var(--surface)] p-4">
             <p className="mb-3 text-xs text-[var(--color-text-muted)]">
-              Generate a Meta-style practice quiz from this lesson&apos;s PDF content. The
-              quiz is scoped to this lesson and added to the quizzes table; learners can
-              take it at <span className="font-mono">/exam/&lt;quizId&gt;</span>.
+              Generate a Meta-style practice quiz grounded on this lesson&apos;s
+              study material — uses extracted text from every PDF and link
+              resource. The quiz is scoped to this lesson and added to the
+              quizzes table; learners can take it from the lesson page or{' '}
+              <span className="font-mono">/exam/&lt;quizId&gt;</span>.
             </p>
             <QuizGenButton
               lessonId={lesson.id}
