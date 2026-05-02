@@ -64,15 +64,17 @@ export async function POST(req: NextRequest) {
       .single();
     if (lesson) {
       lessonTitle = lesson.title;
-      const { data: pdfRes } = await supabase
+      const { data: textRows } = await supabase
         .from('resources')
         .select('extracted_text')
         .eq('lesson_id', lessonId)
-        .eq('kind', 'pdf')
-        .order('order_index')
-        .limit(1)
-        .maybeSingle();
-      lessonContext = lessonContextBlock(lessonTitle, pdfRes?.extracted_text ?? null);
+        .in('kind', ['pdf', 'link', 'text'])
+        .order('order_index');
+      const combined = (textRows ?? [])
+        .map((r) => r.extracted_text)
+        .filter((t): t is string => !!t && t.trim().length > 0)
+        .join('\n\n');
+      lessonContext = lessonContextBlock(lessonTitle, combined || null);
     }
   }
 

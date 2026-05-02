@@ -50,7 +50,15 @@ export default async function TrackDetailPage({
       </div>
 
       <section className="space-y-3">
-        <h2 className="text-sm font-medium text-[var(--color-text-muted)]">Modules</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-medium text-[var(--color-text-muted)]">Modules</h2>
+          <Link
+            href={`/admin/tracks/${track.id}/import`}
+            className="inline-flex h-9 items-center rounded-md border border-[var(--border-strong)] bg-[var(--surface)] px-3 text-xs font-medium text-[var(--color-text)] transition-colors hover:bg-[var(--surface-muted)]"
+          >
+            Bulk import .docx zip
+          </Link>
+        </div>
         <ModuleCreateInline trackId={track.id} />
 
         <div className="space-y-3">

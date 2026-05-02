@@ -14,7 +14,7 @@ import { Input, FieldLabel } from '@/components/shared/input';
 
 export type ResourceEditValues = {
   id: string;
-  kind: 'link' | 'pdf' | 'video';
+  kind: 'link' | 'pdf' | 'video' | 'text';
   title: string;
   url: string | null;
   exam_codes: string[];

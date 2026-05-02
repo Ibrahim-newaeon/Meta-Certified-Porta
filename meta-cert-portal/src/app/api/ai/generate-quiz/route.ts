@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
     .from('resources')
     .select('extracted_text, kind, title, order_index')
     .eq('lesson_id', body.lessonId)
-    .in('kind', ['pdf', 'link'])
+    .in('kind', ['pdf', 'link', 'text'])
     .order('order_index');
 
   const blocks = (rows ?? [])

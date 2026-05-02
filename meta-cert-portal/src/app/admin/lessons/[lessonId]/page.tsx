@@ -10,7 +10,7 @@ import { LessonHeaderEdit } from '@/components/admin/lesson-header-edit';
 
 type ResourceRow = {
   id: string;
-  kind: 'link' | 'pdf' | 'video';
+  kind: 'link' | 'pdf' | 'video' | 'text';
   title: string;
   order_index: number;
   url: string | null;
