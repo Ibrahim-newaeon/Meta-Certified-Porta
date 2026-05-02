@@ -13,6 +13,7 @@ export function ResourcePdfForm({ lessonId }: { lessonId: string }) {
   const [pending, start] = useTransition();
   const [pct, setPct] = useState(0);
   const [error, setError] = useState<string | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
   const [ok, setOk] = useState(false);
   const titleId = useId();
   const fileId = useId();
@@ -20,6 +21,7 @@ export function ResourcePdfForm({ lessonId }: { lessonId: string }) {
 
   async function onSubmit(fd: FormData) {
     setError(null);
+    setWarning(null);
     setOk(false);
 
     const file = fd.get('file') as File | null;
@@ -54,6 +56,11 @@ export function ResourcePdfForm({ lessonId }: { lessonId: string }) {
     }
     setPct(100);
     setOk(true);
+    if (res?.warning) {
+      setWarning(res.warning);
+      // Don't auto-reload — let admin read the warning
+      return;
+    }
     setTimeout(() => window.location.reload(), 600);
   }
 
@@ -116,10 +123,23 @@ export function ResourcePdfForm({ lessonId }: { lessonId: string }) {
           {error}
         </p>
       )}
-      {ok && (
+      {ok && !warning && (
         <p role="status" className="text-sm text-emerald-700 dark:text-emerald-300">
           Uploaded — refreshing…
         </p>
+      )}
+      {warning && (
+        <div
+          role="status"
+          className="rounded-md border border-[var(--color-warn-fg)]/30 bg-[var(--color-warn-bg)] p-3 text-sm text-[var(--color-warn-fg)]"
+        >
+          <div className="font-medium">Uploaded with warning</div>
+          <p className="mt-1">{warning}</p>
+          <p className="mt-2 text-xs">
+            Reload the page; you can use <strong>Re-extract text</strong> on the
+            resource row after fixing the underlying issue.
+          </p>
+        </div>
       )}
       <Button type="submit" disabled={pending}>
         {pending ? pendingLabel : 'Upload PDF'}

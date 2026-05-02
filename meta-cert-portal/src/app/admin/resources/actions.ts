@@ -6,7 +6,11 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { extractPdfText } from '@/lib/pdf/extract';
 import { getMux } from '@/lib/mux/client';
 
-type Result = { error?: string; ok?: boolean } | null;
+type Result = {
+  error?: string;
+  ok?: boolean;
+  warning?: string;
+} | null;
 
 // ---------- LINK ----------
 const LinkInput = z.object({
@@ -73,13 +77,19 @@ export async function finalizePdfResourceAction(
 
   let text = '';
   let pageCount = 0;
+  let extractWarning: string | null = null;
   try {
     const out = await extractPdfText(buf);
     text = out.text;
     pageCount = out.pageCount;
-  } catch {
-    text = '';
-    pageCount = 0;
+    if (text.trim().length === 0 && pageCount > 0) {
+      extractWarning =
+        'PDF opened but no text was extractable — likely a scanned/image-only PDF. AI tutor and quiz generation need a text-PDF.';
+    }
+  } catch (e) {
+    const detail = e instanceof Error ? e.message : 'unknown';
+    extractWarning = `Text extraction failed: ${detail}. Upload saved; use "Re-extract text" to retry.`;
+    console.error('[finalizePdfResourceAction] extractPdfText failed', e);
   }
 
   const { error: insErr } = await admin.from('resources').insert({
@@ -95,6 +105,68 @@ export async function finalizePdfResourceAction(
   if (insErr) return { error: insErr.message };
 
   revalidatePath(`/admin/lessons/${d.lessonId}`);
+  return extractWarning ? { ok: true, warning: extractWarning } : { ok: true };
+}
+
+// Re-run text extraction on an existing PDF resource. Useful when extraction
+// silently failed during upload (e.g. pdfjs build missing in the deployed
+// bundle) — admin can fix the deploy then click Re-extract instead of
+// re-uploading every PDF.
+export async function reExtractPdfResourceAction(
+  resourceId: string,
+): Promise<Result> {
+  await requireRole('admin');
+  z.string().uuid().parse(resourceId);
+
+  const admin = createAdminClient();
+
+  const { data: row, error: rowErr } = await admin
+    .from('resources')
+    .select('id, lesson_id, storage_bucket, storage_path, kind')
+    .eq('id', resourceId)
+    .single();
+  if (rowErr || !row) return { error: rowErr?.message ?? 'Resource not found' };
+  if (row.kind !== 'pdf') return { error: 'Not a PDF resource' };
+  if (!row.storage_bucket || !row.storage_path) {
+    return { error: 'PDF has no storage location' };
+  }
+
+  const { data: file, error: dlErr } = await admin.storage
+    .from(row.storage_bucket)
+    .download(row.storage_path);
+  if (dlErr || !file) return { error: dlErr?.message ?? 'Storage download failed' };
+
+  const buf = Buffer.from(await file.arrayBuffer());
+  let text = '';
+  let pageCount = 0;
+  try {
+    const out = await extractPdfText(buf);
+    text = out.text;
+    pageCount = out.pageCount;
+  } catch (e) {
+    const detail = e instanceof Error ? e.message : 'unknown';
+    return { error: `Text extraction failed: ${detail}` };
+  }
+
+  if (text.trim().length === 0) {
+    return {
+      error:
+        pageCount > 0
+          ? 'PDF parsed but no text layer found (image-only / scanned PDF).'
+          : 'PDF could not be opened.',
+    };
+  }
+
+  const { error: upErr } = await admin
+    .from('resources')
+    .update({
+      extracted_text: text.slice(0, 1_000_000),
+      page_count: pageCount,
+    })
+    .eq('id', resourceId);
+  if (upErr) return { error: upErr.message };
+
+  revalidatePath(`/admin/lessons/${row.lesson_id}`);
   return { ok: true };
 }
 

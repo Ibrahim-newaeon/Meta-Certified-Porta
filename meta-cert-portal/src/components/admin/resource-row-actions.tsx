@@ -4,6 +4,7 @@ import {
   reorderResourceAction,
   updateResourceAction,
   deleteResourceAction,
+  reExtractPdfResourceAction,
 } from '@/app/admin/resources/actions';
 import { Dialog } from '@/components/shared/dialog';
 import { ConfirmButton } from '@/components/shared/confirm-button';
@@ -57,6 +58,7 @@ export function ResourceRowActions({
         >
           <span aria-hidden="true">↓</span>
         </Button>
+        {resource.kind === 'pdf' && <ReExtractButton resourceId={resource.id} />}
         <Button variant="secondary" size="sm" onClick={() => setEditing(true)}>
           Edit
         </Button>
@@ -182,5 +184,49 @@ function ResourceEditDialog({
         </div>
       </form>
     </Dialog>
+  );
+}
+
+function ReExtractButton({ resourceId }: { resourceId: string }) {
+  const [pending, start] = useTransition();
+  const [feedback, setFeedback] = useState<{
+    kind: 'ok' | 'err';
+    message: string;
+  } | null>(null);
+
+  return (
+    <>
+      <Button
+        variant="secondary"
+        size="sm"
+        title="Re-run text extraction on this PDF (use after a deploy that fixed extraction)"
+        disabled={pending}
+        onClick={() => {
+          setFeedback(null);
+          start(async () => {
+            const res = await reExtractPdfResourceAction(resourceId);
+            if (res?.error) {
+              setFeedback({ kind: 'err', message: res.error });
+            } else {
+              setFeedback({ kind: 'ok', message: 'Re-extracted.' });
+            }
+          });
+        }}
+      >
+        {pending ? 'Re-extracting…' : 'Re-extract'}
+      </Button>
+      {feedback && (
+        <span
+          role={feedback.kind === 'err' ? 'alert' : 'status'}
+          className={`text-xs ${
+            feedback.kind === 'err'
+              ? 'text-rose-700 dark:text-rose-300'
+              : 'text-emerald-700 dark:text-emerald-300'
+          }`}
+        >
+          {feedback.message}
+        </span>
+      )}
+    </>
   );
 }
